@@ -1,12 +1,14 @@
-from HexBoard import Grid
 import pygame
 import sys
+
+from HexBoard import Grid
+from Buttons import Button
 
 class Game:
     EMPTY = '.'
 
     def __init__(self, matrix = None):
-        self.backgroundColor = (0, 0, 0)
+        self.backgroundColor = (120, 120, 120)
         self.screenSize = (1280, 720)
         self.boardPosition = (250, 80)
 
@@ -34,6 +36,7 @@ class Game:
         self.matrix = matrix or [[self.__class__.EMPTY for _ in range(self.NUM_COLS)] for _ in range(self.NUM_ROWS)]
         self.text = 'Red\'s turn'
         self.solution = None
+        self.quitButton = None
 
     @classmethod
     def initialiseGame(cls, display, game):
@@ -106,7 +109,7 @@ class Game:
         top = self.screenSize[1] - 1.3 * height
         rectangle = pygame.Rect(left, top, width, height)
         rectangleText = renderedText.get_rect(center=rectangle.center)
-        pygame.draw.rect(self.display, (0, 0, 0), rectangle)
+        pygame.draw.rect(self.display, self.backgroundColor, rectangle)
         self.display.blit(renderedText, rectangleText)
 
     # drawing methods
@@ -124,6 +127,7 @@ class Game:
         self.showText()
 
         self.drawBorder()
+        self.drawQuitButton()
 
     def drawBorder(self):
         colours = list(self.playerColours.values())
@@ -144,3 +148,21 @@ class Game:
             else:
                 corners = corners[fromPoint:toPoint]
             pygame.draw.lines(self.display, color=colour, points=corners, width=width, closed=False)
+
+    def drawQuitButton(self):
+        buttonWidth = 150
+        buttonHeight = 50
+        self.quitButton = Button(display=self.display,
+                         pos = [self.screenSize[0] - buttonWidth - 20, 20],
+                         w=buttonWidth,
+                         h=buttonHeight,
+                         text="QUIT",
+                         bgColor=(128, 186, 38),
+                         selectedBgColor=(200, 230, 140),
+                         fontDimension=26,
+                         textColor=(255, 255, 255))
+        self.quitButton.draw()
+
+        logo = pygame.image.load("../images/logo.png")
+        scaled_logo = pygame.transform.scale(logo, (210, 70))
+        self.display.blit(scaled_logo, (20, self.screenSize[1]-90))

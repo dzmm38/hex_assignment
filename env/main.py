@@ -1,4 +1,5 @@
 import pygame
+import sys
 
 from Game import Game
 
@@ -28,9 +29,16 @@ if __name__ == '__main__':
             if event.type == pygame.QUIT:
                 hexgame.running = False
                 pygame.quit()
+
             # if the mouse is pressed with left-click
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mouse_pos = pygame.mouse.get_pos()
+
+                # if the quit button is pressed during game
+                if hexgame.quitButton.selectByCoord(mouse_pos):
+                    hexgame.running = False
+                    pygame.quit()
+                    sys.exit(0)
 
                 # make move
                 tile = hexgame.getNearestTile(mouse_pos)
