@@ -1,8 +1,10 @@
 from HexBoard import Grid
 import pygame
+import sys
 
 class Game:
     EMPTY = '.'
+    RUNNING = True
 
     def __init__(self, matrix = None):
         self.backgroundColor = (0, 0, 0)
@@ -14,8 +16,7 @@ class Game:
         self.NUM_COLS = 11
 
         self.grid = Grid(self.NUM_ROWS, self.NUM_COLS, self.tileSize)
-
-        self.emptyTiles = self.NUM_ROWS * self.NUM_COLS
+        self.num_emptyTiles = self.NUM_ROWS * self.NUM_COLS   # counter for number of left empty tiles in game
 
         # colours
         self.emptyColour = (70, 70, 70)
@@ -24,9 +25,12 @@ class Game:
             'blue': (0, 0, 255)
         }
 
+        self.current_player = None
+
         for tile in self.hexTiles():
             tile.colour = self.emptyColour
 
+        # used for logic of tile occupancy and terminal output
         self.matrix = matrix or [[self.__class__.EMPTY for _ in range(self.NUM_COLS)] for _ in range(self.NUM_ROWS)]
         self.text = 'Red\'s turn'
         self.solution = None
@@ -38,6 +42,50 @@ class Game:
 
     def hexTiles(self):
         return self.grid.tiles.values()
+
+    def getNearestTile(self, pos):
+        nearestTile = None
+        minDist = sys.maxsize
+
+        for tile in self.hexTiles():
+            distance = tile.distanceSq(pos, self.boardPosition)
+            if distance < minDist:
+                minDist = distance
+                nearestTile = tile
+        return nearestTile
+
+    def changePlayer(self):
+        self.current_player = 'blue' if self.current_player == 'red' else 'red'
+
+    def findSolutionPath(self):
+        for tile in self.grid.topRow():
+            if tile.colour == self.playerColours['red']:
+                path = self.grid.findPath(
+                    tile,
+                    self.grid.bottomRow(),
+                    self.playerColours['red']
+                )
+
+                if path is not None:
+                    return path
+
+        for tile in self.grid.leftColumn():
+            if tile.colour == self.playerColours['blue']:
+                path = self.grid.findPath(
+                    tile,
+                    self.grid.rightColumn(),
+                    self.playerColours['blue']
+                )
+
+                if path is not None:
+                    return path
+
+        return None
+
+    def isGameOver(self):
+        if self.solution is None:
+            self.solution = self.findSolutionPath()
+        return self.solution is not None
 
     def showMatrix(self):
         for i in range(len(self.matrix)):

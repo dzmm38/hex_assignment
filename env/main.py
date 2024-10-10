@@ -16,9 +16,49 @@ if __name__ == '__main__':
 
     hexgame.initialiseGame(display, hexgame)
 
+    hexgame.current_player = 'red'
     hexgame.drawBoard()
-
     pygame.display.update()
+
     print('Start')
     hexgame.showMatrix()
-    time.sleep(5)
+    print(hexgame.text)
+
+    while hexgame.RUNNING:
+        hexgame.drawBoard()
+        events = pygame.event.get()
+
+        for event in events:
+            # if the x is pressed in pygame window
+            if event.type == pygame.QUIT:
+                hexgame.RUNNING = False
+                pygame.quit()
+            # if the mouse is pressed with left-click
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                mouse_pos = pygame.mouse.get_pos()
+
+                # make move
+                tile = hexgame.getNearestTile(mouse_pos)
+                x,y = tile.gridPosition
+
+                # check whether tile is empty and game is not over yet
+                if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                    tile.colour = hexgame.playerColours[hexgame.current_player]
+                    # update logic in game, that is, matrix, visitedTiles and number of emptyTiles
+                    hexgame.matrix[y][x] = hexgame.current_player.upper()
+                    hexgame.grid.visitedTiles[tile.gridPosition] = 1
+                    hexgame.num_emptyTiles -= 1
+
+                    # update the screen
+                    hexgame.drawBoard()
+                    pygame.display.update()
+
+                    if hexgame.isGameOver():
+                        hexgame.text = 'Game over! {} wins!'.format(hexgame.current_player.capitalize())
+                    else:
+                        # change the player
+                        hexgame.changePlayer()
+                        hexgame.text = hexgame.current_player.capitalize() + '\'s turn'
+
+                    print(hexgame.text)
+
