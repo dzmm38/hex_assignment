@@ -20,10 +20,6 @@ if __name__ == '__main__':
     hexgame.drawBoard()
     pygame.display.update()
 
-    print('Start')
-    hexgame.showMatrix()
-    print(hexgame.text)
-
     while hexgame.RUNNING:
         hexgame.drawBoard()
         events = pygame.event.get()
@@ -49,9 +45,6 @@ if __name__ == '__main__':
                     hexgame.grid.visitedTiles[tile.gridPosition] = 1
                     hexgame.num_emptyTiles -= 1
 
-                    # update the screen
-                    hexgame.drawBoard()
-                    pygame.display.update()
 
                     if hexgame.isGameOver():
                         hexgame.text = 'Game over! {} wins!'.format(hexgame.current_player.capitalize())
@@ -60,5 +53,7 @@ if __name__ == '__main__':
                         hexgame.changePlayer()
                         hexgame.text = hexgame.current_player.capitalize() + '\'s turn'
 
-                    print(hexgame.text)
+                    # update the screen
+                    hexgame.drawBoard()
+                    pygame.display.update()
 

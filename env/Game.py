@@ -87,6 +87,7 @@ class Game:
             self.solution = self.findSolutionPath()
         return self.solution is not None
 
+    # terminal output methods
     def showMatrix(self):
         for i in range(len(self.matrix)):
             row = self.matrix[i]
@@ -120,7 +121,7 @@ class Game:
         for tile in self.hexTiles():
             self.drawTile(tile)
 
-        #self.showText()
+        self.showText()
 
         self.drawBorder()
 
