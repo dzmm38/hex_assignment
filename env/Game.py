@@ -4,7 +4,6 @@ import sys
 
 class Game:
     EMPTY = '.'
-    RUNNING = True
 
     def __init__(self, matrix = None):
         self.backgroundColor = (0, 0, 0)
@@ -26,6 +25,7 @@ class Game:
         }
 
         self.current_player = None
+        self.running = True
 
         for tile in self.hexTiles():
             tile.colour = self.emptyColour

@@ -1,5 +1,4 @@
 import pygame
-import time
 
 from Game import Game
 
@@ -20,14 +19,14 @@ if __name__ == '__main__':
     hexgame.drawBoard()
     pygame.display.update()
 
-    while hexgame.RUNNING:
+    while hexgame.running:
         hexgame.drawBoard()
         events = pygame.event.get()
 
         for event in events:
             # if the x is pressed in pygame window
             if event.type == pygame.QUIT:
-                hexgame.RUNNING = False
+                hexgame.running = False
                 pygame.quit()
             # if the mouse is pressed with left-click
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
