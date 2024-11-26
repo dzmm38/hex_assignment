@@ -1,5 +1,7 @@
+import consts
 import pygame
 import sys
+import startPage
 
 from Game import Game
 
@@ -16,7 +18,10 @@ if __name__ == '__main__':
 
     hexgame.initialiseGame(display, hexgame)
 
-    hexgame.current_player = 'red'
+    display.fill(consts.BACKGROUND_COLOR)
+    startPlayer = startPage.homePage(hexgame, display)
+
+    hexgame.current_player = startPlayer
     hexgame.drawBoard()
     pygame.display.update()
 

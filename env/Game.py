@@ -1,3 +1,4 @@
+import consts
 import pygame
 import sys
 
@@ -8,7 +9,7 @@ class Game:
     EMPTY = '.'
 
     def __init__(self, matrix = None):
-        self.backgroundColor = (120, 120, 120)
+        self.backgroundColor = consts.BACKGROUND_COLOR
         self.screenSize = (1280, 720)
         self.boardPosition = (250, 80)
 
@@ -128,6 +129,7 @@ class Game:
 
         self.drawBorder()
         self.drawQuitButton()
+        self.drawTHMLogo()
 
     def drawBorder(self):
         colours = list(self.playerColours.values())
@@ -153,16 +155,17 @@ class Game:
         buttonWidth = 150
         buttonHeight = 50
         self.quitButton = Button(display=self.display,
-                         pos = [self.screenSize[0] - buttonWidth - 20, 20],
-                         w=buttonWidth,
-                         h=buttonHeight,
-                         text="QUIT",
-                         bgColor=(128, 186, 38),
-                         selectedBgColor=(200, 230, 140),
-                         fontDimension=26,
-                         textColor=(255, 255, 255))
+                                 pos = [self.screenSize[0] - buttonWidth - 20, 20],
+                                 w=buttonWidth,
+                                 h=buttonHeight,
+                                 text="QUIT",
+                                 bgColor=consts.THM_COLOR,
+                                 selectedBgColor=consts.THM_LIGHT_COLOR,
+                                 fontDimension=26,
+                                 textColor=consts.WHITE)
         self.quitButton.draw()
 
+    def drawTHMLogo(self):
         logo = pygame.image.load("../images/logo.png")
         scaled_logo = pygame.transform.scale(logo, (210, 70))
         self.display.blit(scaled_logo, (20, self.screenSize[1]-90))
