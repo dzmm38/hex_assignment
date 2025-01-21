@@ -31,6 +31,7 @@ def homePage(game, display):
         selected=0
     )
 
+    # Button um gegen Mensch vs Mensch oder Mensch vs KI zu spielen
     opponent = ButtonGroup(
         top=3 * topMargin + buttonHeight,
         left=game.screenSize[0] / 2 - playerButtonWidth,
