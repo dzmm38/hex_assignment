@@ -96,7 +96,7 @@ def homePage(game, display):
                 if quitbtn.selectByCoord(pos):
                     pygame.quit()
                     sys.exit(0)
-                if not player.selectByCoord(pos) and not opponent.selectByCoord(pos): #Aktivierung des Opponent-Buttons
+                if not player.selectByCoord(pos) and not opponent.selectByCoord(pos): #Aktivierung des Opponent-Buttons :D
                     if start.selectByCoord(pos):
                         return player.getValue(), opponent.getValue()
         pygame.display.update()
