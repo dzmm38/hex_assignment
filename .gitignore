@@ -1,0 +1,13 @@
+.idea/
+.idea/hex_assignment.iml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+env/__pycache__/__init__.cpython-311.pyc
+env/__pycache__/Buttons.cpython-311.pyc
+env/__pycache__/consts.cpython-311.pyc
+env/__pycache__/Game.cpython-311.pyc
+env/__pycache__/hex.cpython-311.pyc
+env/__pycache__/HexBoard.cpython-311.pyc
+env/__pycache__/startPage.cpython-311.pyc

@@ -30,6 +30,27 @@ def homePage(game, display):
         ],
         selected=0
     )
+
+    opponent = ButtonGroup(
+        top=3 * topMargin + buttonHeight,
+        left=game.screenSize[0] / 2 - playerButtonWidth,
+        buttonList=[
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="Mensch", value="mensch",
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="KI-Agent", value="ki",
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK)
+        ],
+        selected=0
+    )
+
+
+
     start = Button(display=display,
                    pos=[game.screenSize[0] / 2 - startButtonWidth / 2, 5*topMargin + 1*buttonHeight],
                    w = startButtonWidth,
@@ -58,6 +79,7 @@ def homePage(game, display):
 
 
     player.draw()
+    opponent.draw()
     start.draw(12,12,12,12)
     quitbtn.draw(12,12,12,12)
 
@@ -73,7 +95,7 @@ def homePage(game, display):
                 if quitbtn.selectByCoord(pos):
                     pygame.quit()
                     sys.exit(0)
-                if not player.selectByCoord(pos):
+                if not player.selectByCoord(pos) and not opponent.selectByCoord(pos):
                     if start.selectByCoord(pos):
-                        return player.getValue()
+                        return player.getValue(), opponent.getValue()
         pygame.display.update()

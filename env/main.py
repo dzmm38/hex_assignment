@@ -9,7 +9,7 @@ from Game import Game
 if __name__ == '__main__':
     pygame.init()
 
-    icon = pygame.image.load('../images/hex.png')
+    icon = pygame.image.load('D:/Programmierung/hex_assignment/images/hex.png')
     pygame.display.set_caption("Hex Game")
     pygame.display.set_icon(icon)
 
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     hexgame.initialiseGame(display, hexgame)
 
     display.fill(consts.BACKGROUND_COLOR)
-    startPlayer = startPage.homePage(hexgame, display)
+    startPlayer, playerType = startPage.homePage(hexgame, display)
 
     hexgame.current_player = startPlayer
     hexgame.drawBoard()
@@ -60,6 +60,7 @@ if __name__ == '__main__':
 
                     if hexgame.isGameOver():
                         hexgame.text = 'Game over! {} wins!'.format(hexgame.current_player.capitalize())
+                        hexgame.drawSolutionPath() # Färbt den Gewinnpfad neu ein
                     else:
                         # change the player
                         hexgame.changePlayer()

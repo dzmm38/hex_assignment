@@ -24,7 +24,8 @@ class Game:
         self.emptyColour = (70, 70, 70)
         self.playerColours = {
             'red': (255, 0, 0),
-            'blue': (0, 0, 255)
+            'blue': (0, 0, 255),
+            'white': (255, 255, 255) # Gewinnfarbe -- wird verwendet für den Lösungspfad
         }
 
         self.current_player = None
@@ -36,7 +37,7 @@ class Game:
         # used for logic of tile occupancy and terminal output
         self.matrix = matrix or [[self.__class__.EMPTY for _ in range(self.NUM_COLS)] for _ in range(self.NUM_ROWS)]
         self.text = 'Red\'s turn'
-        self.solution = None
+        self.solution = None # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
         self.quitButton = None
 
     @classmethod
@@ -62,6 +63,10 @@ class Game:
         self.current_player = 'blue' if self.current_player == 'red' else 'red'
 
     def findSolutionPath(self):
+        '''
+        Checkt nach jedem Zug, ob es einen gewinner gibt.
+        Macht das für beide Farben (Rot und Blau)
+        '''
         for tile in self.grid.topRow():
             if tile.colour == self.playerColours['red']:
                 path = self.grid.findPath(
@@ -86,10 +91,25 @@ class Game:
 
         return None
 
+
     def isGameOver(self):
         if self.solution is None:
             self.solution = self.findSolutionPath()
         return self.solution is not None
+
+
+    def drawSolutionPath(self):
+        '''
+        Ändert die Farbe eines Tiles das zu dem Gewinnpfad gehört auf weiß (ist unter playerColours anpassbar).
+        Ruft nach der änderung dann drawBoard auf damit das Spielfeld mit den aktualisierten Farben neu gezeichnet wird
+        '''
+        path_color = self.playerColours['white']
+
+        for tile in self.solution:
+            tile.colour = path_color
+
+        self.drawBoard()
+
 
     # terminal output methods
     def showMatrix(self):
@@ -166,6 +186,6 @@ class Game:
         self.quitButton.draw()
 
     def drawTHMLogo(self):
-        logo = pygame.image.load("../images/logo.png")
+        logo = pygame.image.load("D:/Programmierung/hex_assignment/images/logo.png")
         scaled_logo = pygame.transform.scale(logo, (210, 70))
         self.display.blit(scaled_logo, (20, self.screenSize[1]-90))
