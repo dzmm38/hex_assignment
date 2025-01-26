@@ -40,6 +40,15 @@ class Game:
         self.solution = None # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
         self.quitButton = None
 
+    def updateGameSize(self, gameSize):
+        self.NUM_ROWS = gameSize
+        self.NUM_COLS = gameSize
+        self.grid = Grid(self.NUM_ROWS, self.NUM_COLS, self.tileSize)
+        self.num_emptyTiles = self.NUM_ROWS * self.NUM_COLS
+        self.matrix = [[self.__class__.EMPTY for _ in range(self.NUM_COLS)] for _ in range(self.NUM_ROWS)]
+        for tile in self.hexTiles():
+            tile.colour = self.emptyColour
+
     @classmethod
     def initialiseGame(cls, display, game):
         cls.display = display

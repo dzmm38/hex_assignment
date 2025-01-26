@@ -19,8 +19,14 @@ if __name__ == '__main__':
     hexgame.initialiseGame(display, hexgame)
 
     display.fill(consts.BACKGROUND_COLOR)
-    #startPlayer = startPage.homePage(hexgame, display)
-    startPlayer, playerType = startPage.homePage(hexgame, display)
+    startPlayer, playerType, gameSize = startPage.homePage(hexgame, display)
+
+    # Aktualisiere die Spielfeldgröße mit dem neuen gameSize-Wert
+    hexgame.updateGameSize(gameSize)
+
+    print(startPlayer)
+    print(playerType)
+    print(gameSize)
 
     hexgame.current_player = startPlayer
     hexgame.drawBoard()

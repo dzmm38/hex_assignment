@@ -50,6 +50,29 @@ def homePage(game, display):
         selected=0
     )
 
+    fieldSize = ButtonGroup(
+        top=4 * topMargin + buttonHeight,
+        left=game.screenSize[0] / 2 - playerButtonWidth,
+        buttonList=[
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="7x7", value=7,
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="9x9", value=9,
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="11x11", value=11,
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK)
+        ],
+        selected=0
+    )
+
 
 
     start = Button(display=display,
@@ -81,6 +104,8 @@ def homePage(game, display):
 
     player.draw()
     opponent.draw()
+    fieldSize.draw()
+
     start.draw(12,12,12,12)
     quitbtn.draw(12,12,12,12)
 
@@ -96,7 +121,7 @@ def homePage(game, display):
                 if quitbtn.selectByCoord(pos):
                     pygame.quit()
                     sys.exit(0)
-                if not player.selectByCoord(pos) and not opponent.selectByCoord(pos): #Aktivierung des Opponent-Buttons
+                if not player.selectByCoord(pos) and not opponent.selectByCoord(pos) and not fieldSize.selectByCoord(pos): #Aktivierung des Opponent-Buttons
                     if start.selectByCoord(pos):
-                        return player.getValue(), opponent.getValue()
+                        return player.getValue(), opponent.getValue(), fieldSize.getValue()
         pygame.display.update()
