@@ -52,7 +52,7 @@ def homePage(game, display):
 
     fieldSize = ButtonGroup(
         top=4 * topMargin + buttonHeight,
-        left=game.screenSize[0] / 2 - playerButtonWidth,
+        left=game.screenSize[0] / 2 - (playerButtonWidth + playerButtonWidth/2),
         buttonList=[
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
                    text="7x7", value=7,
@@ -76,13 +76,13 @@ def homePage(game, display):
 
 
     start = Button(display=display,
-                   pos=[game.screenSize[0] / 2 - startButtonWidth / 2, 5*topMargin + 1*buttonHeight],
+                   pos=[game.screenSize[0] / 2 - startButtonWidth / 2, 6*topMargin + 1*buttonHeight],
                    w = startButtonWidth,
                    h = buttonHeight,
                    textColor=consts.BLACK,
                    text = "Start")
     quitbtn = Button(display=display,
-                     pos=[game.screenSize[0] / 2 - startButtonWidth / 2, 5*topMargin + 2*buttonHeight+35],
+                     pos=[game.screenSize[0] / 2 - startButtonWidth / 2, 6*topMargin + 2*buttonHeight+35],
                      w = startButtonWidth,
                      h = buttonHeight,
                      textColor=consts.BLACK,
