@@ -4,6 +4,7 @@ import sys
 import startPage
 
 from Game import Game
+from env.agents import HumanPlayer, RandomKI
 
 
 if __name__ == '__main__':
@@ -19,16 +20,16 @@ if __name__ == '__main__':
     hexgame.initialiseGame(display, hexgame)
 
     display.fill(consts.BACKGROUND_COLOR)
-    startPlayer, playerType, gameSize = startPage.homePage(hexgame, display)
+    startColor, opponentType, gameSize = startPage.homePage(hexgame, display)
 
     # Aktualisiere die Spielfeldgröße mit dem neuen gameSize-Wert
     hexgame.updateGameSize(gameSize)
 
-    print(startPlayer)
-    print(playerType)
-    print(gameSize)
+    # Initialisiere die beiden Spieler
+    hexgame.initialise_players(opponent=opponentType,color=startColor)
 
-    hexgame.current_player = startPlayer
+    hexgame.current_player = hexgame.player1 #TODO Player 1 fängt aktuell immer an d.h. das dass auch immer der menschliche spieler ist
+
     hexgame.drawBoard()
     pygame.display.update()
 
