@@ -4,9 +4,13 @@ import sys
 
 from HexBoard import Grid
 from Buttons import Button
+from env.agents import Player, RandomKI, HumanPlayer
 
 class Game:
     EMPTY = '.'
+    #TODO hier habe ich zwei variablen hinzugefügt damit man später zwischen den spieler objekten unterscheiden kann
+    player1: Player
+    player2: Player
 
     def __init__(self, matrix = None):
         self.backgroundColor = consts.BACKGROUND_COLOR
@@ -49,6 +53,18 @@ class Game:
         for tile in self.hexTiles():
             tile.colour = self.emptyColour
 
+    # TODO eine methode zum erstellen der spieler objekte hier werden dann die verschiedenen matchups aufgelistet
+    def initialise_players(self,opponent, color):
+        if opponent == 'mensch':
+            self.player1 = HumanPlayer()
+            self.player2 = HumanPlayer()
+        elif opponent == 'ki':
+            self.player1 = HumanPlayer()
+            self.player2 = RandomKI()
+
+        self.player1.set_player_color(color)
+        self.player2.set_player_color('blue' if self.player1.get_player_color() == 'red' else 'blue')
+
     @classmethod
     def initialiseGame(cls, display, game):
         cls.display = display
@@ -68,8 +84,18 @@ class Game:
                 nearestTile = tile
         return nearestTile
 
+
+    def get_tile(self,x,y):
+        return self.grid.tiles[x,y]
+
+    #TODO muss überarbeitet werden damit hier Klassen verwendet werden können
     def changePlayer(self):
-        self.current_player = 'blue' if self.current_player == 'red' else 'red'
+        if self.current_player == self.player1:
+            self.current_player = self.player2
+        elif self.current_player == self.player2:
+            self.current_player = self.player1
+
+        #self.current_player = 'blue' if self.current_player == 'red' else 'red'
 
     def findSolutionPath(self):
         '''
@@ -198,3 +224,5 @@ class Game:
         logo = pygame.image.load("../images/logo.png")
         scaled_logo = pygame.transform.scale(logo, (210, 70))
         self.display.blit(scaled_logo, (20, self.screenSize[1]-90))
+
+
