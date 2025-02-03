@@ -226,3 +226,23 @@ class Game:
         self.display.blit(scaled_logo, (20, self.screenSize[1]-90))
 
 
+    def handle_move(self,x,y,tile):
+        # check whether tile is empty and game is not over yet
+        if self.matrix[y][x] == self.EMPTY and not self.isGameOver():
+            tile.colour = self.playerColours[self.current_player.get_player_color()]  # Change
+            # update logic in game, that is, matrix, visitedTiles and number of emptyTiles
+            self.matrix[y][x] = self.current_player.get_player_color().upper()  # Change
+            self.grid.visitedTiles[tile.gridPosition] = 1
+            self.num_emptyTiles -= 1
+
+            if self.isGameOver():
+                self.text = 'Game over! {} wins!'.format(self.current_player.get_player_color().capitalize())
+                self.drawSolutionPath()  # Färbt den Gewinnpfad neu ein
+            else:
+                # change the player
+                self.changePlayer()
+                self.text = self.current_player.get_player_color().capitalize() + '\'s turn'
+
+            # update the screen
+            self.drawBoard()
+            pygame.display.update()

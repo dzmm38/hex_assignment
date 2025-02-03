@@ -43,38 +43,40 @@ if __name__ == '__main__':
                 hexgame.running = False
                 pygame.quit()
 
-            # if the mouse is pressed with left-click
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mouse_pos = pygame.mouse.get_pos()
+### ---------------------------------------------------------------------- ###
+### ------------------------- Human Player Logic ------------------------- ###
+### ---------------------------------------------------------------------- ###
+            if isinstance(hexgame.current_player, HumanPlayer):
+                # if the mouse is pressed with left-click
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
 
-                # if the quit button is pressed during game
-                if hexgame.quitButton.selectByCoord(mouse_pos):
-                    hexgame.running = False
-                    pygame.quit()
-                    sys.exit(0)
+                    # if the quit button is pressed during game
+                    if hexgame.quitButton.selectByCoord(mouse_pos):
+                        hexgame.running = False
+                        pygame.quit()
+                        sys.exit(0)
 
-                # make move
-                tile = hexgame.getNearestTile(mouse_pos)
-                x,y = tile.gridPosition
+                    # make move
+                    tile = hexgame.getNearestTile(mouse_pos)
+                    x, y = tile.gridPosition
+
+                    if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                        hexgame.handle_move(x=x,y=y,tile=tile)
+
+### ---------------------------------------------------------------------- ###
+### ------------------------ RandomKI Agent Logic ------------------------ ###
+### ---------------------------------------------------------------------- ###
+            elif isinstance(hexgame.current_player, RandomKI):
+                x,y = hexgame.current_player.get_move(gameSize) # get a move from the agent
+
+                # checks if the move is valid -- if not gets a new move --> does this till a valid move is returned
+                while(hexgame.matrix[y][x] != hexgame.EMPTY and not hexgame.isGameOver()):
+                    x,y = hexgame.current_player.get_move(gameSize)
+
+                tile = hexgame.get_tile(x,y)    # converts the two values form the agent into a tile
 
                 # check whether tile is empty and game is not over yet
                 if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
-                    tile.colour = hexgame.playerColours[hexgame.current_player]
-                    # update logic in game, that is, matrix, visitedTiles and number of emptyTiles
-                    hexgame.matrix[y][x] = hexgame.current_player.upper()
-                    hexgame.grid.visitedTiles[tile.gridPosition] = 1
-                    hexgame.num_emptyTiles -= 1
-
-
-                    if hexgame.isGameOver():
-                        hexgame.text = 'Game over! {} wins!'.format(hexgame.current_player.capitalize())
-                        hexgame.drawSolutionPath() # Färbt den Gewinnpfad neu ein
-                    else:
-                        # change the player
-                        hexgame.changePlayer()
-                        hexgame.text = hexgame.current_player.capitalize() + '\'s turn'
-
-                    # update the screen
-                    hexgame.drawBoard()
-                    pygame.display.update()
+                    hexgame.handle_move(x=x,y=y,tile=tile)
 
