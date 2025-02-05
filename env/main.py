@@ -20,13 +20,15 @@ if __name__ == '__main__':
     hexgame.initialiseGame(display, hexgame)
 
     display.fill(consts.BACKGROUND_COLOR)
-    startColor, opponentType, gameSize = startPage.homePage(hexgame, display)
+    player_1_color, player_2_color, opponent_1_type, opponent_2_type, gameSize, number_of_games = startPage.homePage(hexgame, display)
+
 
     # Aktualisiere die Spielfeldgröße mit dem neuen gameSize-Wert
     hexgame.updateGameSize(gameSize)
 
     # Initialisiere die beiden Spieler
-    hexgame.initialise_players(opponent=opponentType,color=startColor)
+    hexgame.initialise_players(opponent_1=opponent_1_type,opponent_2=opponent_2_type,
+                               player_1_color=player_1_color, player_2_color=player_2_color)
 
     hexgame.current_player = hexgame.player1 #TODO Player 1 fängt aktuell immer an d.h. das dass auch immer der menschliche spieler ist
 
