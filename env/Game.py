@@ -54,16 +54,19 @@ class Game:
             tile.colour = self.emptyColour
 
     # TODO eine methode zum erstellen der spieler objekte hier werden dann die verschiedenen matchups aufgelistet
-    def initialise_players(self,opponent, color):
-        if opponent == 'mensch':
+    def initialise_players(self,opponent_1, opponent_2, player_1_color, player_2_color):
+        if opponent_1 == 'mensch':
             self.player1 = HumanPlayer()
+        elif opponent_1 == 'ki':
+            self.player1 = RandomKI()
+
+        if opponent_2 == 'mensch':
             self.player2 = HumanPlayer()
-        elif opponent == 'ki':
-            self.player1 = HumanPlayer()
+        elif opponent_2 == 'ki':
             self.player2 = RandomKI()
 
-        self.player1.set_player_color(color)
-        self.player2.set_player_color('blue' if self.player1.get_player_color() == 'red' else 'blue')
+        self.player1.set_player_color(player_1_color)
+        self.player2.set_player_color(player_2_color)
 
     @classmethod
     def initialiseGame(cls, display, game):
@@ -184,6 +187,7 @@ class Game:
 
         self.drawBorder()
         self.drawQuitButton()
+        self.draw_next_button()
         self.drawTHMLogo()
 
     def drawBorder(self):
@@ -220,6 +224,21 @@ class Game:
                                  textColor=consts.WHITE)
         self.quitButton.draw()
 
+    def draw_next_button(self):
+        buttonWidth = 150
+        buttonHeight = 50
+        self.next_button = Button(display=self.display,
+                                  pos = [self.screenSize[0] - buttonWidth - 20, self.screenSize[1] - buttonHeight - 20],
+                                  w=buttonWidth,
+                                  h=buttonHeight,
+                                  text="NEXT",
+                                  bgColor=consts.THM_COLOR,
+                                  selectedBgColor=consts.THM_LIGHT_COLOR,
+                                  fontDimension=26,
+                                  textColor=consts.WHITE)
+        self.next_button.draw()
+
+
     def drawTHMLogo(self):
         logo = pygame.image.load("../images/logo.png")
         scaled_logo = pygame.transform.scale(logo, (210, 70))
@@ -246,3 +265,22 @@ class Game:
             # update the screen
             self.drawBoard()
             pygame.display.update()
+
+    def reset_game(self):
+        print("Game Resetted")
+        self.grid = Grid(self.NUM_ROWS, self.NUM_COLS, self.tileSize)
+        self.num_emptyTiles = self.NUM_ROWS * self.NUM_COLS  # counter for number of left empty tiles in game
+
+        self.current_player = None
+        self.running = True
+
+        for tile in self.hexTiles():
+            tile.colour = self.emptyColour
+
+        # used for logic of tile occupancy and terminal output
+        self.matrix = self.matrix or [[self.__class__.EMPTY for _ in range(self.NUM_COLS)] for _ in range(self.NUM_ROWS)]
+        self.text = 'Red\'s turn'
+        self.solution = None  # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
+        self.quitButton = None
+
+        self.showMatrix()
