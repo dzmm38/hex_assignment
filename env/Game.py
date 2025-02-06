@@ -1,6 +1,7 @@
 import consts
 import pygame
 import sys
+import random
 
 from HexBoard import Grid
 from Buttons import Button
@@ -11,6 +12,9 @@ class Game:
     #TODO hier habe ich zwei variablen hinzugefügt damit man später zwischen den spieler objekten unterscheiden kann
     player1: Player
     player2: Player
+    starting_player: Player
+    current_game: int = 1
+    max_game: int
 
     def __init__(self, matrix = None):
         self.backgroundColor = consts.BACKGROUND_COLOR
@@ -160,6 +164,7 @@ class Game:
             print()
 
     def showText(self):
+        # Shows the Turn text
         fontObj = pygame.font.SysFont('arial', 40)
         renderedText = fontObj.render(self.text, True, (255, 255, 255))
         width = 400
@@ -184,6 +189,7 @@ class Game:
             self.drawTile(tile)
 
         self.showText()
+        self.show_game_number()
 
         self.drawBorder()
         self.drawQuitButton()
@@ -266,21 +272,26 @@ class Game:
             self.drawBoard()
             pygame.display.update()
 
-    def reset_game(self):
-        print("Game Resetted")
-        self.grid = Grid(self.NUM_ROWS, self.NUM_COLS, self.tileSize)
-        self.num_emptyTiles = self.NUM_ROWS * self.NUM_COLS  # counter for number of left empty tiles in game
+    def reset_game(self, game_size, current_player):
+        self.current_game = self.current_game + 1
+        self.__init__()
+        self.updateGameSize(game_size)
+        self.random_starting_player()
 
-        self.current_player = None
-        self.running = True
+    def random_starting_player(self):
+        starting_player = random.randint(0,1)
+        self.current_player = self.player1 if starting_player == 0 else self.player2
 
-        for tile in self.hexTiles():
-            tile.colour = self.emptyColour
+    def show_game_number(self):
+        text = "Game: " + str(self.current_game) + " / " + str(self.max_game)
+        fontObj = pygame.font.SysFont('arial', 40)
+        renderedText = fontObj.render(text, True, (255, 255, 255))
+        width = 400
+        height = 100
+        left = self.screenSize[0] / 2 - width / 2
+        top = self.screenSize[1] - 2 * height
+        rectangle = pygame.Rect(left, top, width, height)
+        rectangleText = renderedText.get_rect(center=rectangle.center)
+        pygame.draw.rect(self.display, self.backgroundColor, rectangle)
+        self.display.blit(renderedText, rectangleText)
 
-        # used for logic of tile occupancy and terminal output
-        self.matrix = self.matrix or [[self.__class__.EMPTY for _ in range(self.NUM_COLS)] for _ in range(self.NUM_ROWS)]
-        self.text = 'Red\'s turn'
-        self.solution = None  # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
-        self.quitButton = None
-
-        self.showMatrix()
