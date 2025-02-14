@@ -5,6 +5,7 @@ import random
 
 from HexBoard import Grid
 from Buttons import Button
+from env.PGNGenerator import PGNGenerator
 from env.agents import Player, RandomKI, HumanPlayer
 
 class Game:
@@ -15,6 +16,7 @@ class Game:
     starting_player: Player
     current_game: int = 1
     max_game: int
+    pgn_generator: PGNGenerator = None
 
     def __init__(self, matrix = None):
         self.backgroundColor = consts.BACKGROUND_COLOR
@@ -47,6 +49,9 @@ class Game:
         self.text = 'Red\'s turn'
         self.solution = None # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
         self.quitButton = None
+
+        if self.pgn_generator is not None:
+            self.star_generator(self.NUM_ROWS)
 
     def updateGameSize(self, gameSize):
         self.NUM_ROWS = gameSize
@@ -254,6 +259,9 @@ class Game:
     def handle_move(self,x,y,tile):
         # check whether tile is empty and game is not over yet
         if self.matrix[y][x] == self.EMPTY and not self.isGameOver():
+
+            self.pgn_generator.add_move((x,y),self.current_game)
+
             tile.colour = self.playerColours[self.current_player.get_player_color()]  # Change
             # update logic in game, that is, matrix, visitedTiles and number of emptyTiles
             self.matrix[y][x] = self.current_player.get_player_color().upper()  # Change
@@ -263,6 +271,9 @@ class Game:
             if self.isGameOver():
                 self.text = 'Game over! {} wins!'.format(self.current_player.get_player_color().capitalize())
                 self.drawSolutionPath()  # Färbt den Gewinnpfad neu ein
+
+                self.pgn_generator.set_result(("1-0" if self.current_player == self.player1 else "0-1"),self.current_game)
+
             else:
                 # change the player
                 self.changePlayer()
@@ -294,4 +305,13 @@ class Game:
         rectangleText = renderedText.get_rect(center=rectangle.center)
         pygame.draw.rect(self.display, self.backgroundColor, rectangle)
         self.display.blit(renderedText, rectangleText)
+
+
+    def set_pgn_generator(self, generator: PGNGenerator):
+        self.pgn_generator = generator
+
+    def star_generator(self, board_size):
+        self.pgn_generator.start_pgn_generator(player1=self.player1, player2=self.player2,
+                                               game_round=self.current_game, board_size=board_size)
+
 

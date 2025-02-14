@@ -7,9 +7,12 @@ import startPage
 
 from Game import Game
 from env.agents import HumanPlayer, RandomKI
+from PGNGenerator import PGNGenerator
 
 
 if __name__ == '__main__':
+    pgn_generator = PGNGenerator()
+
     current_game = 1
     pygame.init()
 
@@ -26,7 +29,6 @@ if __name__ == '__main__':
     display.fill(consts.BACKGROUND_COLOR)
     player_1_color, player_2_color, opponent_1_type, opponent_2_type, gameSize, number_of_games = startPage.homePage(hexgame, display)
 
-
     #hexgame.initialiseGame(display, hexgame)
     print(number_of_games)
     # Aktualisiere die Spielfeldgröße mit dem neuen gameSize-Wert
@@ -36,6 +38,9 @@ if __name__ == '__main__':
     hexgame.initialise_players(opponent_1=opponent_1_type,opponent_2=opponent_2_type,
                                player_1_color=player_1_color, player_2_color=player_2_color)
     hexgame.max_game = number_of_games
+
+    hexgame.set_pgn_generator(generator=pgn_generator)
+    hexgame.star_generator(board_size=gameSize)
 
     hexgame.current_player = hexgame.player1 #TODO Player 1 fängt aktuell immer an d.h. das dass auch immer der menschliche spieler ist
     hexgame.starting_player = hexgame.current_player
@@ -77,6 +82,9 @@ if __name__ == '__main__':
                         # if the quit button is pressed during game
                         if hexgame.quitButton.selectByCoord(mouse_pos):
                             hexgame.running = False
+
+                            hexgame.pgn_generator.save_file()
+
                             pygame.quit()
                             sys.exit(0)
 
@@ -106,6 +114,9 @@ if __name__ == '__main__':
                         # if the quit button is pressed during game
                         if hexgame.quitButton.selectByCoord(mouse_pos):
                             hexgame.running = False
+
+                            hexgame.pgn_generator.save_file()
+
                             pygame.quit()
                             sys.exit(0)
 
