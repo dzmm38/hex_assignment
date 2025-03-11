@@ -6,7 +6,7 @@ import sys
 import startPage
 
 from Game import Game
-from env.agents import HumanPlayer, RandomKI
+from env.agents import HumanPlayer
 from PGNGenerator import PGNGenerator
 
 
@@ -42,7 +42,8 @@ if __name__ == '__main__':
     hexgame.set_pgn_generator(generator=pgn_generator)
     hexgame.star_generator(board_size=gameSize)
 
-    hexgame.current_player = hexgame.player1 #TODO Player 1 fängt aktuell immer an d.h. das dass auch immer der menschliche spieler ist
+    # sets starting player
+    hexgame.current_player = hexgame.player1
     hexgame.starting_player = hexgame.current_player
 
     hexgame.drawBoard()
@@ -50,51 +51,11 @@ if __name__ == '__main__':
 
     while hexgame.running:
         hexgame.drawBoard()
-### ---------------------------------------------------------------------- ###
-### --------------- RandomKI Agent vs RandomKI Agent Logic --------------- ###
-### ---------------------------------------------------------------------- ###
-        if isinstance(hexgame.player1, RandomKI) and isinstance(hexgame.player2, RandomKI):
-            time.sleep(0.1)
-            x, y = hexgame.current_player.get_move(gameSize)  # get a move from the agent
 
-            # checks if the move is valid -- if not gets a new move --> does this till a valid move is returned
-            while (hexgame.matrix[y][x] != hexgame.EMPTY and not hexgame.isGameOver()):
-                x, y = hexgame.current_player.get_move(gameSize)
-
-            tile = hexgame.get_tile(x, y)  # converts the two values form the agent into a tile
-
-            # check whether tile is empty and game is not over yet
-            if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
-                hexgame.handle_move(x=x, y=y, tile=tile)
-
-            if hexgame.isGameOver():
-
-                events = pygame.event.get()
-
-                for event in events:
-                    if event.type == pygame.QUIT:
-                        hexgame.running = False
-                        pygame.quit()
-
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        mouse_pos = pygame.mouse.get_pos()
-
-                        # if the quit button is pressed during game
-                        if hexgame.quitButton.selectByCoord(mouse_pos):
-                            hexgame.running = False
-
-                            hexgame.pgn_generator.save_file()
-
-                            pygame.quit()
-                            sys.exit(0)
-
-                #TODO Sorgt dafür das nach einem Spiel ein weiteres direkt beginnt solange die anzahl an gesetzten spielen nicht überschritten ist
-                if current_game < number_of_games:
-                    current_game = current_game + 1
-                    time.sleep(2)
-                    hexgame.reset_game(game_size=gameSize, current_player= hexgame.player1)
-
-        else:
+        ## ------ ------------------ ------ ##
+        ## ------ Human Player logic ------ ##
+        ## ------ ------------------ ------ ##
+        if isinstance(hexgame.current_player, HumanPlayer) and not hexgame.isGameOver():
             events = pygame.event.get()
 
             for event in events:
@@ -103,55 +64,62 @@ if __name__ == '__main__':
                     hexgame.running = False
                     pygame.quit()
 
-### ---------------------------------------------------------------------- ###
-### -------------------- Human vs Human Player Logic --------------------- ###
-### ---------------------------------------------------------------------- ###
-                if isinstance(hexgame.current_player, HumanPlayer):
-                    # if the mouse is pressed with left-click
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        mouse_pos = pygame.mouse.get_pos()
+                # check if left mouse button pressed
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
 
-                        # if the quit button is pressed during game
-                        if hexgame.quitButton.selectByCoord(mouse_pos):
-                            hexgame.running = False
+                    if hexgame.quitButton.selectByCoord(mouse_pos):
+                        hexgame.running = False
+                        hexgame.pgn_generator.save_file()
+                        pygame.quit()
+                        sys.exit(0)
 
-                            hexgame.pgn_generator.save_file()
+                    # if no button pressed make a move (nearest tile)
+                    tile = hexgame.getNearestTile(mouse_pos)
+                    x, y = tile.gridPosition
 
-                            pygame.quit()
-                            sys.exit(0)
-
-                        # make move
-                        tile = hexgame.getNearestTile(mouse_pos)
-                        x, y = tile.gridPosition
-
-                        if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
-                            hexgame.handle_move(x=x,y=y,tile=tile)
-
-### ---------------------------------------------------------------------- ###
-### ------------------- RandomKI Agent vs Human Logic -------------------- ###
-### ---------------------------------------------------------------------- ###
-                elif isinstance(hexgame.current_player, RandomKI):
-                    x,y = hexgame.current_player.get_move(gameSize) # get a move from the agent
-
-                    # checks if the move is valid -- if not gets a new move --> does this till a valid move is returned
-                    while(hexgame.matrix[y][x] != hexgame.EMPTY and not hexgame.isGameOver()):
-                        x,y = hexgame.current_player.get_move(gameSize)
-
-                    tile = hexgame.get_tile(x,y)    # converts the two values form the agent into a tile
-
-                    # check whether tile is empty and game is not over yet
                     if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
-                        hexgame.handle_move(x=x,y=y,tile=tile)
+                        hexgame.handle_move(x=x, y=y, tile=tile)
+                        print("HumanPlayer" + ": (" + str(x) + "," + str(y) + ")")
+
+        ## ------ ------------------ ------ ##
+        ## ------- AI Player logic -------- ##
+        ## ------ ------------------ ------ ##
+        elif not isinstance(hexgame.current_player, HumanPlayer) and not hexgame.isGameOver():
+            time.sleep(0.1)
+            x,y = hexgame.current_player.get_move(hex_board=hexgame.matrix)
+            tile = hexgame.get_tile(x=x, y=y)
+
+            if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                hexgame.handle_move(x=x,y=y,tile=tile)
+                #print(hexgame.matrix)
+
+            player_class = hexgame.player2.__class__.__name__ if hexgame.current_player == hexgame.player1 else hexgame.player1.__class__.__name__
+            print(str(player_class) + ": (" + str(x) + "," + str(y) + ")")
 
 
-                # TODO Sorgt dafür das nach einem Spiel beim drücken des Next Buttons ein neues spiel beginnt solange die vorher gesetze anzahl noch nicht erreicht ist
-                if hexgame.isGameOver():
-                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                        mouse_pos = pygame.mouse.get_pos()
-                        # if the quit button is pressed during game
-                        if hexgame.next_button.selectByCoord(mouse_pos):
-                            if current_game < number_of_games:
-                                current_game = current_game + 1
-                                hexgame.reset_game(game_size=gameSize, current_player=hexgame.player1)
-                                hexgame.drawBoard()
-                                pygame.display.update()
+        ## ------ ------------------ ------ ##
+        ## ----- Input after Game Over ---- ##
+        ## ------ ------------------ ------ ##
+        if hexgame.isGameOver():
+            events = pygame.event.get()
+
+            for event in events:
+                if event.type == pygame.QUIT:
+                    hexgame.running = False
+                    pygame.quit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+
+                    if hexgame.quitButton.selectByCoord(mouse_pos):
+                        hexgame.pgn_generator.save_file()
+                        pygame.quit()
+                        sys.exit()
+
+                    if hexgame.next_button.selectByCoord(mouse_pos):
+                        if current_game < number_of_games:
+                            current_game = current_game + 1
+                            hexgame.reset_game(game_size=len(hexgame.matrix), current_player=hexgame.player1) # TODO hier ggf. wechsel
+                            hexgame.drawBoard()
+                            pygame.display.update()

@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from agents import Player
 
 
@@ -9,7 +8,6 @@ class PGNGenerator:
         self.games = []
 
 
-    #TODO actuell nur farbe als spieler muss später noch geändert werden auf Player object
     def start_pgn_generator(self, player1:Player, player2:Player, game_round, board_size=11):
         game = {
             "event" : "Hex Games",
@@ -17,15 +15,15 @@ class PGNGenerator:
             "date" : datetime.today().strftime('%Y-%m-%d'),
             "round" : game_round,
             "board_size" : board_size,
-            "player1" : player1.get_player_color(),
-            "player2" : player2.get_player_color(),
+            "player1" : player1.__class__.__name__,
+            "player2" : player2.__class__.__name__,
             "moves" : [],
             "result" : None
         }
         self.games.append(game)
 
     def add_move(self, move, game_round):
-        # MOve ist ein Tupel der das tile beschreibt
+        # Move ist ein Tupel der das tile beschreibt
         if self.games:
             self.games[game_round-1]["moves"].append(move)
 

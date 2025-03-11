@@ -70,7 +70,7 @@ def homePage(game, display):
     renderedText = fontObj.render("Player 1", True, (255, 255, 255))
     width = playerButtonWidth
     height = 50
-    left = game.screenSize[0] / 4 - width / 2
+    left = game.screenSize[0] / 4 - width #/ 2
     top = topMargin + 100
     rectangle = pygame.Rect(left, top, width, height)
     rectangleText = renderedText.get_rect(center=rectangle.center)
@@ -80,7 +80,7 @@ def homePage(game, display):
     # Button um gegen Mensch vs Mensch oder Mensch vs KI zu spielen
     opponent_1 = ButtonGroup(
         top=3 * topMargin + buttonHeight,
-        left=game.screenSize[0] / 4 - playerButtonWidth,
+        left=game.screenSize[0] / 4 - playerButtonWidth*2.5,
         buttonList=[
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
                    text="Mensch", value="mensch",
@@ -88,7 +88,17 @@ def homePage(game, display):
                    selectedBgColor=consts.WHITE,
                    textColor=consts.BLACK),
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
-                   text="KI-Agent", value="ki",
+                   text="Random", value="ki",
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="Dijkstra", value="dijkstra-ki",
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="MCTS", value="mcts-ki",
                    bgColor=consts.THM_COLOR,
                    selectedBgColor=consts.WHITE,
                    textColor=consts.BLACK),
@@ -98,7 +108,7 @@ def homePage(game, display):
 
     player_1_color = ButtonGroup(
         top=4 * topMargin + buttonHeight,
-        left=game.screenSize[0] / 4 - playerButtonWidth,
+        left=game.screenSize[0] / 4 - playerButtonWidth*1.5,
         buttonList=[
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
                    text="Red", value="red",
@@ -118,7 +128,7 @@ def homePage(game, display):
     renderedText = fontObj.render("Player 2", True, (255, 255, 255))
     width = 50
     height = 50
-    left = (game.screenSize[0] / 4) * 3 - width /2
+    left = (game.screenSize[0] / 4) * 3 + width/2
     top = topMargin + 100
     rectangle = pygame.Rect(left, top, width, height)
     rectangleText = renderedText.get_rect(center=rectangle.center)
@@ -127,7 +137,7 @@ def homePage(game, display):
 
     opponent_2 = ButtonGroup(
         top=3 * topMargin + buttonHeight,
-        left=(game.screenSize[0] / 4)*3 - playerButtonWidth,
+        left=(game.screenSize[0] / 4) * 3 - playerButtonWidth*1.5,
         buttonList=[
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
                    text="Mensch", value="mensch",
@@ -135,7 +145,17 @@ def homePage(game, display):
                    selectedBgColor=consts.WHITE,
                    textColor=consts.BLACK),
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
-                   text="KI-Agent", value="ki",
+                   text="Random", value="ki",
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="Dijkstra", value="dijkstra-ki",
+                   bgColor=consts.THM_COLOR,
+                   selectedBgColor=consts.WHITE,
+                   textColor=consts.BLACK),
+            Button(display=display, w=playerButtonWidth, h=buttonHeight,
+                   text="MCTS", value="mcts-ki",
                    bgColor=consts.THM_COLOR,
                    selectedBgColor=consts.WHITE,
                    textColor=consts.BLACK),
@@ -145,7 +165,7 @@ def homePage(game, display):
 
     player_2_color = ButtonGroup(
         top=4 * topMargin + buttonHeight,
-        left=(game.screenSize[0] / 4)*3 - playerButtonWidth,
+        left=(game.screenSize[0] / 4) * 3 - playerButtonWidth*1.5 + playerButtonWidth,
         buttonList=[
             Button(display=display, w=playerButtonWidth, h=buttonHeight,
                    text="Red", value="red",
@@ -166,8 +186,8 @@ def homePage(game, display):
     #Textfeld
     #Textfeld für Anzahl der Spiele
     FONT = pygame.font.Font(None, 40)
-    color_activ = consts.BACKGROUND_COLOR
-    color_inactive = consts.BLACK
+    color_activ = consts.WHITE
+    color_inactive = consts.THM_COLOR
     color = color_inactive
     active = False
     input_text = "1"

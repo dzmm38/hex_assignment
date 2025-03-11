@@ -6,7 +6,8 @@ import random
 from HexBoard import Grid
 from Buttons import Button
 from env.PGNGenerator import PGNGenerator
-from env.agents import Player, RandomKI, HumanPlayer
+from env.agents import Player, RandomKI, HumanPlayer, ShortestPathAgent, MCTSAgent
+
 
 class Game:
     EMPTY = '.'
@@ -50,8 +51,9 @@ class Game:
         self.solution = None # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
         self.quitButton = None
 
-        if self.pgn_generator is not None:
-            self.star_generator(self.NUM_ROWS)
+        # TODO delete !!!!
+        #if self.pgn_generator is not None:
+        #    self.star_generator(self.NUM_ROWS)
 
     def updateGameSize(self, gameSize):
         self.NUM_ROWS = gameSize
@@ -68,11 +70,19 @@ class Game:
             self.player1 = HumanPlayer()
         elif opponent_1 == 'ki':
             self.player1 = RandomKI()
+        elif opponent_1 == 'dijkstra-ki':
+            self.player1 = ShortestPathAgent(board_size=len(self.matrix), max_depth=5)
+        elif opponent_1 == 'mcts-ki':
+            self.player1 = MCTSAgent(iterations=10000, exploration_weight=0.2)
 
         if opponent_2 == 'mensch':
             self.player2 = HumanPlayer()
         elif opponent_2 == 'ki':
             self.player2 = RandomKI()
+        elif opponent_2 == 'dijkstra-ki':
+            self.player2 = ShortestPathAgent(board_size=len(self.matrix), max_depth=5)
+        elif opponent_2 == 'mcts-ki':
+            self.player2 = MCTSAgent(iterations=10000, exploration_weight=0.2)
 
         self.player1.set_player_color(player_1_color)
         self.player2.set_player_color(player_2_color)
@@ -287,11 +297,20 @@ class Game:
         self.current_game = self.current_game + 1
         self.__init__()
         self.updateGameSize(game_size)
-        self.random_starting_player()
+        self.star_generator(game_size)
+        #self.random_starting_player()
+        self.change_starting_player()
+
 
     def random_starting_player(self):
-        starting_player = random.randint(0,1)
-        self.current_player = self.player1 if starting_player == 0 else self.player2
+        self.starting_player = self.player1 if random.randint(0,1) == 0 else self.player2
+        self.current_player = self.starting_player
+
+
+    def change_starting_player(self):
+        self.starting_player = self.player1 if self.starting_player == self.player2 else self.player2
+        self.current_player = self.starting_player
+
 
     def show_game_number(self):
         text = "Game: " + str(self.current_game) + " / " + str(self.max_game)
@@ -299,7 +318,7 @@ class Game:
         renderedText = fontObj.render(text, True, (255, 255, 255))
         width = 400
         height = 100
-        left = self.screenSize[0] / 2 - width / 2
+        left = -50
         top = self.screenSize[1] - 2 * height
         rectangle = pygame.Rect(left, top, width, height)
         rectangleText = renderedText.get_rect(center=rectangle.center)
