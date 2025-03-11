@@ -1,0 +1,230 @@
+from Shortest path Agent:
+
+ """def get_starting_positions(self, hex_board: [[]], color: str):
+
+        TESTED.
+        Erstellt und liefert 2 Listen von Tupeln die Nodes eines hex spiels darstellen.
+        Diese beschreiben dann jeweils die Start- und Ziel-möglichkeiten eines Spielers
+        Hinweis: Bereits belegte Felder von der andern Farbe werden nicht in die Liste aufgenommen
+
+        start_nodes: list[tuple[int, int]] = []
+        end_nodes: list[tuple[int, int]] = []
+
+        if color == 'RED':
+            # Vertikale
+            for x in range(self.board_size):
+                # Hier wird überprüft, ob die Felder bereits mit RED belegt sind oder noch leer sind
+                # Falls ja dann zu start und end hinzufügen
+                if hex_board[0][x] == 'RED' or hex_board[0][x] == '.':
+                    start_nodes.append((x, 0))
+                if hex_board[self.board_size - 1][x] == 'RED' or hex_board[self.board_size - 1][x] == '.':
+                    end_nodes.append((x, self.board_size - 1))
+        else:
+            # Horizontale
+            for y in range(self.board_size):
+                # Hier wird überprüft, ob die Felder bereits mit BLUE belegt sind oder noch leer sind
+                # Falls ja dann zu start und end hinzufügen
+                if hex_board[y][0] == 'BLUE' or hex_board[y][0] == '.':
+                    start_nodes.append((0, y))
+                if hex_board[y][self.board_size - 1] == 'BLUE' or hex_board[y][0] == '.':
+                    end_nodes.append((self.board_size - 1, y))
+
+        #logging.debug("Possible start Nodes for " + color + ": " + str(start_nodes))
+        #logging.debug("Possible end Nodes for " + color + ": " + str(end_nodes))
+        return start_nodes, end_nodes"""
+
+
+    """def get_neighbors(self, node: tuple):
+
+        TESTED.
+        Erstellt und liefert eine Liste von Tupeln x & y die Nachbarn der übergebenen Node sind
+
+        x,y = node
+        # beschreibt, die schritte um zu allen nachbarn zu gelangen
+        neighbor_definition = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1), (x - 1, y + 1), (x + 1, y - 1)]
+        neighbors: list[tuple[int, int]] = []
+
+        for nx, ny in neighbor_definition:
+            # sollte eine node x oder y negativ sein wird diese ignoriert da es diese dann nicht gibt
+            if 0 <= nx < self.board_size and 0 <= ny < self.board_size:
+                neighbors.append((nx, ny))
+
+        #logging.debug("Neighbors for node " + str(node) + ": " + str(neighbors))
+        return neighbors"""
+
+
+    """def is_game_over(self, hex_board: [[]], color: str) -> bool:
+
+        TESTED. (ist 8x schneller als wenn man dies mit Dijkstra überprüft).
+        Überprüft ob, es einen Pfad gibt der Start und Ziel Nodes miteinander verbindet anhand einer Breitensuche.
+        Falls ja, ist das Spiel vorbei bzw. ein überprüfter Zug kann gewinnen.
+        Liefert dann einen Bool, ob das spiel vorbei ist oder nicht
+
+        visited = set() # Gewinnpfad der während der Funktion gefüllt wird
+        queue = deque() # deck (Liste in der vorne und hinten herausgenommen und hinzugefügt werden kann)
+
+        starting_nodes, _ = self.get_starting_positions(hex_board=hex_board, color=color)
+        goal = self.board_size - 1
+
+        # Fügt die Startknoten der queue hinzu, wenn diese die Farbe des Spielers hat
+        # (sonst kann es keinen Gewinner gegeben)
+        for x,y in starting_nodes:
+            if hex_board[y][x] == color:
+                queue.append((x,y))
+                visited.add((x,y))
+
+        while queue:
+            x,y = queue.popleft() # nimmt ersten Eintrag aus dem deck
+
+            # eigentliche Gewinn-überprüfung
+            if (color == 'RED' and y == goal) or (color == 'BLUE' and x == goal):
+                #logging.debug("Spieler " + str(color) + " hat gewonnen (Game Over)")
+                return True
+
+            # Überprüft nun alle nachbarn nach Verbindungen
+            for nx, ny in self.get_neighbors((x, y)):
+                if 0 <= nx < self.board_size and 0 <= ny < self.board_size and (nx, ny) not in visited and \
+                        hex_board[ny][nx] == color:
+                    queue.append((nx, ny))
+                    visited.add((nx, ny))
+
+        #logging.debug("Prüfung für Game Over... kein Gewinner !!")
+        return False"""
+
+"""def get_possible_moves(self, hex_board: [[]]):
+
+        TESTED.
+        Berechnen aller möglichen Züge (Felder die Leer sind → '.').
+        Liefert eine Liste von Nodes die alle möglichen Züge beinhaltet
+
+        possible_moves: list[tuple[int, int]] = []
+        for x in range(self.board_size):
+            for y in range(self.board_size):
+                if hex_board[y][x] == '.':  # only possible and valid move if the tile is free -> '.'
+                    possible_moves.append((x, y))
+
+        #logging.debug("Number of possible moves: " + str(len(possible_moves)))
+        #logging.debug("Possible moves : " + str(possible_moves))
+        return possible_moves"""
+
+
+##############################
+Aus der main Klasse::::
+
+"""
+### ---------------------------------------------------------------------- ###
+### --------------- RandomKI Agent vs RandomKI Agent Logic --------------- ###
+### ---------------------------------------------------------------------- ###
+        if isinstance(hexgame.player1, RandomKI) and isinstance(hexgame.player2, RandomKI):
+            time.sleep(0.1)
+            x, y = hexgame.current_player.get_move(gameSize)  # get a move from the agent
+
+            # checks if the move is valid -- if not gets a new move --> does this till a valid move is returned
+            while (hexgame.matrix[y][x] != hexgame.EMPTY and not hexgame.isGameOver()):
+                x, y = hexgame.current_player.get_move(gameSize)
+
+            tile = hexgame.get_tile(x, y)  # converts the two values form the agent into a tile
+
+            # check whether tile is empty and game is not over yet
+            if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                hexgame.handle_move(x=x, y=y, tile=tile)
+
+            if hexgame.isGameOver():
+
+                events = pygame.event.get()
+
+                for event in events:
+                    if event.type == pygame.QUIT:
+                        hexgame.running = False
+                        pygame.quit()
+
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+
+                        # if the quit button is pressed during game
+                        if hexgame.quitButton.selectByCoord(mouse_pos):
+                            hexgame.running = False
+
+                            hexgame.pgn_generator.save_file()
+
+                            pygame.quit()
+                            sys.exit(0)
+
+                #TODO Sorgt dafür das nach einem Spiel ein weiteres direkt beginnt solange die anzahl an gesetzten spielen nicht überschritten ist
+                if current_game < number_of_games:
+                    current_game = current_game + 1
+                    time.sleep(2)
+                    hexgame.reset_game(game_size=gameSize, current_player= hexgame.player1)
+
+        else:
+            events = pygame.event.get()
+
+            for event in events:
+                # if the x is pressed in pygame window
+                if event.type == pygame.QUIT:
+                    hexgame.running = False
+                    pygame.quit()
+
+### ---------------------------------------------------------------------- ###
+### -------------------- Human vs Human Player Logic --------------------- ###
+### ---------------------------------------------------------------------- ###
+                if isinstance(hexgame.current_player, HumanPlayer):
+                    # if the mouse is pressed with left-click
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+
+                        # if the quit button is pressed during game
+                        if hexgame.quitButton.selectByCoord(mouse_pos):
+                            hexgame.running = False
+
+                            hexgame.pgn_generator.save_file()
+
+                            pygame.quit()
+                            sys.exit(0)
+
+                        # make move
+                        tile = hexgame.getNearestTile(mouse_pos)
+                        x, y = tile.gridPosition
+
+                        if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                            hexgame.handle_move(x=x,y=y,tile=tile)
+
+### ---------------------------------------------------------------------- ###
+### ------------------- RandomKI Agent vs Human Logic -------------------- ###
+### ---------------------------------------------------------------------- ###
+                elif isinstance(hexgame.current_player, RandomKI):
+                    x,y = hexgame.current_player.get_move(gameSize) # get a move from the agent
+
+                    # checks if the move is valid -- if not gets a new move --> does this till a valid move is returned
+                    while(hexgame.matrix[y][x] != hexgame.EMPTY and not hexgame.isGameOver()):
+                        x,y = hexgame.current_player.get_move(gameSize)
+
+                    tile = hexgame.get_tile(x,y)    # converts the two values form the agent into a tile
+
+                    # check whether tile is empty and game is not over yet
+                    if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                        hexgame.handle_move(x=x,y=y,tile=tile)
+
+
+                elif isinstance(hexgame.current_player, AIAgentDijkstra):
+                    x,y = hexgame.current_player.get_move(hexgame.matrix)
+                    print("AI MOVE:" + str(x) + "," + str(y))
+
+                    tile = hexgame.get_tile(x,y)
+
+                    if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
+                        hexgame.handle_move(x,y,tile)
+
+
+                # TODO Sorgt dafür das nach einem Spiel beim drücken des Next Buttons ein neues spiel beginnt solange die vorher gesetze anzahl noch nicht erreicht ist
+                if hexgame.isGameOver():
+                    if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                        mouse_pos = pygame.mouse.get_pos()
+                        # if the quit button is pressed during game
+                        if hexgame.next_button.selectByCoord(mouse_pos):
+                            if current_game < number_of_games:
+                                current_game = current_game + 1
+                                hexgame.reset_game(game_size=gameSize, current_player=hexgame.player1)
+                                hexgame.drawBoard()
+                                pygame.display.update()
+"""

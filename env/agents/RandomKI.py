@@ -2,8 +2,17 @@ from .Player import Player
 import random
 
 class RandomKI(Player):
-    def get_move(self, board_size):
-        x_value = random.randint(0,board_size-1)
-        y_value = random.randint(0,board_size-1)
+    def get_move(self, hex_board: [[]]):
+        board_size = len(hex_board)
+        x_value, y_value = self.calculate_move(board_size=board_size)
+
+        while hex_board[y_value][x_value] != '.':
+            x_value, y_value = self.calculate_move(board_size=board_size)
+
+        return x_value, y_value
+
+    def calculate_move(self, board_size):
+        x_value = random.randint(0, board_size - 1)
+        y_value = random.randint(0, board_size - 1)
 
         return x_value, y_value

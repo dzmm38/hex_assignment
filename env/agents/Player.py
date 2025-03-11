@@ -5,7 +5,7 @@ class Player(ABC):
         self.color = color
 
     @abstractmethod
-    def get_move(self):
+    def get_move(self, hex_board: [[]]):
         """
         Hier soll dann in den konkreten Klassen die methode choose_move implementiert werden
         hierbei soll dann der zug berechnet oder ausgewählt werden den der jeweilige Spieler tätigen möchte
