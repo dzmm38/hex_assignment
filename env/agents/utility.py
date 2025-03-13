@@ -27,7 +27,7 @@ def get_starting_positions(hex_board: [[]], color: str):
             # Falls ja dann zu start und end hinzufügen
             if hex_board[y][0] == 'BLUE' or hex_board[y][0] == '.':
                 start_nodes.append((0, y))
-            if hex_board[y][size - 1] == 'BLUE' or hex_board[y][0] == '.':
+            if hex_board[y][size - 1] == 'BLUE' or hex_board[y][size-1] == '.': #TODO hier leider fehler gewesen muss hex_board[y][size-1] vorher hex_board[y][0]
                 end_nodes.append((size - 1, y))
 
     # logging.debug("Possible start Nodes for " + color + ": " + str(start_nodes))
