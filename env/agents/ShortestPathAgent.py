@@ -1,3 +1,6 @@
+import random
+from copy import deepcopy
+from functools import lru_cache
 from env.agents import Player
 from tqdm import tqdm
 import env.agents.utility as util
@@ -8,12 +11,19 @@ import copy
 
 
 class ShortestPathAgent(Player):
+    evaluation_cache = {} # Dijkstra Cache für kürzeste Pfade damit schon durchsuchte nicht noch einmal berechnet werden
+
     def __init__(self, board_size: int, max_depth: int = 3):
         super().__init__()
         self.max_depth = max_depth
         self.board_size = board_size
         # ----- LOGGING CONFIG ----- #
         logging.basicConfig(level=logging.DEBUG)
+        #self.counter = 0
+
+
+    def board_hash(self,hex_board):
+        return ''.join([''.join(row) for row in hex_board])  # Einfaches Hashing per String
 
 
     def evaluate_board(self, hex_board: [[]]):
@@ -26,20 +36,30 @@ class ShortestPathAgent(Player):
         Vorschlag: hier können zusätzlich weitere bewertungskriterien eingebracht werden die dann zusammen den value
         des boards bestimmen
         """
-        own_value = float('inf')
-        opp_value = float('-inf')
+        board_key = self.board_hash(hex_board)  # Board-Hash als Key für Cache
+        if board_key in self.evaluation_cache:
+            return self.evaluation_cache[board_key]  # Falls schon berechnet → direkt zurückgeben
 
-        own_paths = self.dijkstra(hex_board, self.color)
+        own_value = 100
+        opp_value = -100
+
+        own_paths = self.dijkstra(hex_board, self.color.upper())
+        if not own_paths:
+            print(own_paths)
+            print(hex_board)
         opp_paths = self.dijkstra(hex_board, 'BLUE' if self.color == 'RED' else 'RED')
 
         if len(own_paths) != 0:
             # mit heappop wird der Pfad mit den geringsten Kosten ausgewählt → kürzester Pfad
-            own_value, _ = heapq.heappop(own_paths)
+            own_value, _ = own_paths[0]
         if len(opp_paths) != 0:
-            opp_value, _ = heapq.heappop(opp_paths)
+            opp_value, _ = opp_paths[0]
+
+        result = opp_value - own_value
+        self.evaluation_cache[board_key] = result
 
         #logging.debug("Value of board state: "+str(own_value-opp_value)+" / "+"own: "+ str(own_value)+ " -- opp: "+str(opp_value))
-        return own_value - opp_value  # kleiner gleich besserer
+        return result  # kleiner gleich besserer
 
 
     def dijkstra(self, hex_board: [[]], color: str):
@@ -48,21 +68,20 @@ class ShortestPathAgent(Player):
         und returned diesen dann in einem Heap mit den jeweiligen Kosten
         """
         start_nodes, end_nodes = util.get_starting_positions(hex_board=hex_board, color=color)
-        priority_queue: heapq = []
-        paths: heapq = []
 
-        distances = {start: float('inf') for start in start_nodes} # started mit kosten unendlich für alle felder
+        priority_queue: heapq = []
+        paths = []
+
+        distances = {} # started mit kosten unendlich für alle felder
         from_node: dict = {} # dictionary in dem die ausgehenden nodes gespeichert werden
 
-        # TODO Kann ggf. vereinfacht werden
-        # überprüft die startpunkte ob diese leer oder bereits vom spieler belegt sind, demnach dann die ausgangskosten
         for start in start_nodes:
             if hex_board[start[1]][start[0]] == color:
-                distances[start] = 1 # erstes setzen der Startkosten, wenn feld von selbst besetzt
-                heapq.heappush(priority_queue, (1, start))
+                distances[start] = 0 # erstes setzen der Startkosten, wenn feld von selbst besetzt
+                heapq.heappush(priority_queue, (0, start))
             else:
-                distances[start] = 3 # erstes setzen der Startkosten, wenn feld nicht selbst besetzt
-                heapq.heappush(priority_queue, (3, start))
+                distances[start] = 1 # erstes setzen der Startkosten, wenn feld nicht selbst besetzt
+                heapq.heappush(priority_queue, (1, start))
 
         #logging.debug("Dijkstra Startknoten kosten: " + str(priority_queue))
 
@@ -72,32 +91,26 @@ class ShortestPathAgent(Player):
             current_distance, current_node = heapq.heappop(priority_queue)
             neighbors = util.get_neighbors(node=current_node, size=len(hex_board))
 
-            if current_node in end_nodes:
+            if current_node in end_nodes: # abbruch kriterium
                 shortest_path = []
                 while current_node in from_node:
                     shortest_path.append(current_node)
                     current_node = from_node[current_node]
                 shortest_path.append(current_node)
-                heapq.heappush(paths, (current_distance, shortest_path))
-                # --- DEBUG --- #
-                # print("Selected Path: " + str(path[::-1]) + " --- with cost: " + str(current_distance))
-                # --- DEBUG --- #
+                paths.append((current_distance, shortest_path))
                 #logging.debug("Selected Path: " + str(paths[::-1]) + " --- with cost: " + str(current_distance))
 
             if current_node in visited_nodes:
-                continue# TODO macht continue einfach nächste instanz in while und überspringt rest ?
-
+                continue # wenn dann in die nächste while instance
             visited_nodes.add(current_node)
 
             for neighbor in neighbors:
                 if hex_board[neighbor[1]][neighbor[0]] == color:
-                    cost = 1
+                    cost = 0
                 elif hex_board[neighbor[1]][neighbor[0]] == '.':
-                    cost = 3
+                    cost = 1
                 else:
-                    # Hier wird ja nur geschaut nach nachbarn also generell wenn nachbar kein weg
-                    # scheinbar doch machbar
-                    cost = float('inf')
+                    continue # ignoriert dann einfach diesen durchgang da nicht möglich
 
                 new_distance = current_distance + cost
 
@@ -109,8 +122,7 @@ class ShortestPathAgent(Player):
         return paths
 
     def minmax(self, hex_board: [[]], depth: int, alpha: float, beta: float, maximizing: bool, progress_bar=None):
-        # TODO irgendwas stimmt hier mit dem return von maximizing nicht da der fehler eigentlich nie auftreten soltle
-        if depth == 0 or util.is_game_over(hex_board=hex_board, color=self.color):
+        if depth == 0 or util.is_game_over(hex_board=hex_board, color=self.color.upper()):
             return self.evaluate_board(hex_board=hex_board)
 
         possible_moves = util.get_possible_moves(hex_board=hex_board)
@@ -121,11 +133,13 @@ class ShortestPathAgent(Player):
         if maximizing:
             max_evaluation = float('-inf')
             best_move = None
+            # Priorisierung der Züge
+            #possible_moves.sort(key=lambda move: self.simulation_move_heuristic(hex_board, move, self.color), reverse=True)
+            random.shuffle(possible_moves)
 
             for move in possible_moves:
-                temp_board = [row[:] for row in hex_board]  # kopieren des aktuellen boards zum Berechnen ## TODO durch deepcopy erstzen
-                x, y = move
-                temp_board[y][x] = self.color.upper()
+                temp_board = deepcopy(hex_board)  # kopieren des aktuellen boards zum Berechnen ## TODO durch deepcopy erstzen
+                temp_board[move[1]][move[0]] = self.color.upper()
                 evaluation = self.minmax(temp_board, depth - 1, alpha, beta, False)
 
                 if evaluation > max_evaluation:
@@ -133,7 +147,7 @@ class ShortestPathAgent(Player):
                     best_move = move
 
                 alpha = max(alpha, evaluation)
-                if beta <= alpha:
+                if alpha >= beta:
                     break  # cutoff zur steigerung der effizienz
 
                 if progress_bar is not None:
@@ -142,15 +156,27 @@ class ShortestPathAgent(Player):
             if depth == self.max_depth:
                 progress_bar.close()  # Schließe die Progress Bar nach der ersten Ebene
             # return max_evaluation if depth > 1 else best_move
-            return best_move if depth == self.max_depth else max_evaluation
+
+            if best_move is None and depth == self.max_depth:
+                print("Hier ist ein Fehler")
+
+            if depth == self.max_depth:
+                return best_move
+            else:
+                return max_evaluation
+
+            #return best_move if depth == self.max_depth else max_evaluation
 
 
         else:
             min_evaluation = float('inf')
+            # Priorisierung der Züge
+            #possible_moves.sort(key=lambda move: self.simulation_move_heuristic(hex_board, move, 'BLUE' if self.color.upper() == 'RED' else 'RED'),reverse=True)
+            random.shuffle(possible_moves)
+
             for move in possible_moves:
-                temp_board = [row[:] for row in hex_board]  # kopieren des aktuellen boards zum Berechnen
-                x, y = move
-                temp_board[y][x] = 'BLUE' if self.color.upper() == 'RED' else 'RED'
+                temp_board = deepcopy(hex_board)  # kopieren des aktuellen boards zum Berechnen
+                temp_board[move[1]][move[0]] = 'BLUE' if self.color.upper() == 'RED' else 'RED'
                 evaluation = self.minmax(temp_board, depth - 1, alpha, beta, True)
 
                 min_evaluation = min(min_evaluation, evaluation)
@@ -171,8 +197,8 @@ class ShortestPathAgent(Player):
         moves = util.get_possible_moves(hex_board)
         for move in moves:
             temp_board = copy.deepcopy(hex_board)
-            temp_board[move[1]][move[0]] = self.color
-            if util.is_game_over(hex_board=temp_board, color=self.color):
+            temp_board[move[1]][move[0]] = self.color.upper()
+            if util.is_game_over(hex_board=temp_board, color=self.color.upper()):
                 logging.debug("Gewinnzug gefunden: " + str(move))
                 return move
 
@@ -180,3 +206,14 @@ class ShortestPathAgent(Player):
         beta = float('inf')
         best_move = self.minmax(hex_board=hex_board,depth=self.max_depth,alpha=alpha, beta=beta,maximizing=True)
         return best_move
+
+
+    def simulation_move_heuristic(self, board, move, color):
+        x, y = move
+        score = 0
+        neighbors = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+
+        for nx, ny in neighbors:
+            if 0 <= nx < len(board) and 0 <= ny < len(board) and board[ny][nx] == color:
+                score += 1
+        return score
