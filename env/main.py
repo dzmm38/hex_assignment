@@ -102,6 +102,16 @@ if __name__ == '__main__':
         ## ----- Input after Game Over ---- ##
         ## ------ ------------------ ------ ##
         if hexgame.isGameOver():
+            if not isinstance(hexgame.player1, HumanPlayer) and not isinstance(hexgame.player2, HumanPlayer):
+                if current_game < number_of_games:
+                    time.sleep(2)
+                    current_game = current_game + 1
+                    hexgame.reset_game(game_size=len(hexgame.matrix),
+                                       current_player=hexgame.player1)  # TODO hier ggf. wechsel
+                    hexgame.drawBoard()
+                    pygame.display.update()
+                    continue
+
             events = pygame.event.get()
 
             for event in events:
