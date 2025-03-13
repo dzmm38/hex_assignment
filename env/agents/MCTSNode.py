@@ -92,7 +92,7 @@ class MCTSNode:
         """
         temp_board = deepcopy(self.hex_board) # erstellt 1 zu 1 kopie des aktuellen boards
         moves = util.get_possible_moves(temp_board)
-        random.shuffle(moves)
+        moves.sort(key=lambda move: self.simulation_move_heuristic(temp_board, move, color), reverse=True)
         current_player = color
         winner = None
         for move in moves:
@@ -117,5 +117,18 @@ class MCTSNode:
         self.visits += 1
         if result == self.color:    # result beinhaltet einen String mit dem Gewinner, falls vorhanden
             self.wins += 1
+        elif result is not None:
+            self.wins -= 1
         if self.parent: # wenn ein parent vorhanden ist, dann weiter nach oben propagieren → nur bei 'root'-node nicht
             self.parent.backpropagate(result)
+
+
+    def simulation_move_heuristic(self, board, move, color):
+        x, y = move
+        score = 0
+        neighbors = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
+
+        for nx, ny in neighbors:
+            if 0 <= nx < len(board) and 0 <= ny < len(board) and board[ny][nx] == color:
+                score += 1
+        return score
