@@ -71,18 +71,18 @@ class Game:
         elif opponent_1 == 'ki':
             self.player1 = RandomKI()
         elif opponent_1 == 'dijkstra-ki':
-            self.player1 = ShortestPathAgent(board_size=len(self.matrix), max_depth=5)
+            self.player1 = ShortestPathAgent(board_size=len(self.matrix), max_depth=3)
         elif opponent_1 == 'mcts-ki':
-            self.player1 = MCTSAgent(iterations=10000, exploration_weight=0.2)
+            self.player1 = MCTSAgent(iterations=5000, exploration_weight=0.2)
 
         if opponent_2 == 'mensch':
             self.player2 = HumanPlayer()
         elif opponent_2 == 'ki':
             self.player2 = RandomKI()
         elif opponent_2 == 'dijkstra-ki':
-            self.player2 = ShortestPathAgent(board_size=len(self.matrix), max_depth=5)
+            self.player2 = ShortestPathAgent(board_size=len(self.matrix), max_depth=3)
         elif opponent_2 == 'mcts-ki':
-            self.player2 = MCTSAgent(iterations=10000, exploration_weight=0.2)
+            self.player2 = MCTSAgent(iterations=5000, exploration_weight=0.5)
 
         self.player1.set_player_color(player_1_color)
         self.player2.set_player_color(player_2_color)
@@ -295,6 +295,7 @@ class Game:
 
     def reset_game(self, game_size, current_player):
         self.current_game = self.current_game + 1
+        print("Aktuelles Spiel: " + str(self.current_game))
         self.__init__()
         self.updateGameSize(game_size)
         self.star_generator(game_size)
