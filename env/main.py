@@ -29,8 +29,6 @@ if __name__ == '__main__':
     display.fill(consts.BACKGROUND_COLOR)
     player_1_color, player_2_color, opponent_1_type, opponent_2_type, gameSize, number_of_games = startPage.homePage(hexgame, display)
 
-    #hexgame.initialiseGame(display, hexgame)
-    print(number_of_games)
     # Aktualisiere die Spielfeldgröße mit dem neuen gameSize-Wert
     hexgame.updateGameSize(gameSize)
 
@@ -39,6 +37,7 @@ if __name__ == '__main__':
                                player_1_color=player_1_color, player_2_color=player_2_color)
     hexgame.max_game = number_of_games
 
+    # sets the pgn generator for the current hexgame and initialises it
     hexgame.set_pgn_generator(generator=pgn_generator)
     hexgame.star_generator(board_size=gameSize)
 
@@ -55,6 +54,10 @@ if __name__ == '__main__':
         ## ------ ------------------ ------ ##
         ## ------ Human Player logic ------ ##
         ## ------ ------------------ ------ ##
+        """
+        Hier werden die Spieler Inputs überprüft
+        Dieser Teil des Codes wird ausgeführt wenn ein Menschlicher Spieler Spielt
+        """
         if isinstance(hexgame.current_player, HumanPlayer) and not hexgame.isGameOver():
             events = pygame.event.get()
 
@@ -85,6 +88,7 @@ if __name__ == '__main__':
         ## ------ ------------------ ------ ##
         ## ------- AI Player logic -------- ##
         ## ------ ------------------ ------ ##
+        # Anfrage an AI Agents nach einem Zug sofern diese am Zug sind
         elif not isinstance(hexgame.current_player, HumanPlayer) and not hexgame.isGameOver():
             time.sleep(0.1)
             x,y = hexgame.current_player.get_move(hex_board=hexgame.matrix)
@@ -92,7 +96,6 @@ if __name__ == '__main__':
 
             if hexgame.matrix[y][x] == hexgame.EMPTY and not hexgame.isGameOver():
                 hexgame.handle_move(x=x,y=y,tile=tile)
-                #print(hexgame.matrix)
 
             player_class = hexgame.player2.__class__.__name__ if hexgame.current_player == hexgame.player1 else hexgame.player1.__class__.__name__
             print(str(player_class) + ": (" + str(x) + "," + str(y) + ")")
@@ -101,7 +104,11 @@ if __name__ == '__main__':
         ## ------ ------------------ ------ ##
         ## ----- Input after Game Over ---- ##
         ## ------ ------------------ ------ ##
+        """
+        Nachdem das Spiel vorbei wird der Spieler Input geprüft um z.B. Next Quit etc. auszuwählen
+        """
         if hexgame.isGameOver():
+            # Automatische next Game funktion wenn nur KI gegen KI Spielt
             if not isinstance(hexgame.player1, HumanPlayer) and not isinstance(hexgame.player2, HumanPlayer):
                 if current_game < number_of_games:
                     time.sleep(2)

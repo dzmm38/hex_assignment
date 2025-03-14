@@ -13,7 +13,7 @@ startButtonWidth = 110
 difficultyButtonWidth = 200
 gametypeButtonWidth = 300
 topMargin = 60
-number_of_games = 0
+number_of_games = 0 # um die nummer an Spielen Zählen zu können
 
 
 def homePage(game, display):
@@ -77,7 +77,7 @@ def homePage(game, display):
     pygame.draw.rect(game.display, game.backgroundColor, rectangle)
     game.display.blit(renderedText, rectangleText)
 
-    # Button um gegen Mensch vs Mensch oder Mensch vs KI zu spielen
+    # Button um gegen für die Auswahl an spielern
     opponent_1 = ButtonGroup(
         top=3 * topMargin + buttonHeight,
         left=game.screenSize[0] / 4 - playerButtonWidth*2.5,
@@ -135,6 +135,7 @@ def homePage(game, display):
     pygame.draw.rect(game.display, game.backgroundColor, rectangle)
     game.display.blit(renderedText, rectangleText)
 
+    # Button um gegen für die Auswahl an spielern
     opponent_2 = ButtonGroup(
         top=3 * topMargin + buttonHeight,
         left=(game.screenSize[0] / 4) * 3 - playerButtonWidth*1.5,
@@ -213,8 +214,6 @@ def homePage(game, display):
                 pygame.quit()
                 sys.exit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
-
-                #TODO am besten sollte das noch in die buttons datei irgednwie ausgelagert werden
                 if player_1_color.selectByCoord(event.pos):
                    if player_2_color.getValue() == player_1_color.getValue():
                        player_2_color.selected = 0 if player_2_color.selected else 1
@@ -228,7 +227,6 @@ def homePage(game, display):
 
                        player_1_color.buttonList[0].selected = True if player_1_color.selected == 0 else False
                        player_1_color.buttonList[1].selected = True if player_1_color.selected == 1 else False
-
 
                 player_1_color.draw()
                 player_2_color.draw()
@@ -251,7 +249,6 @@ def homePage(game, display):
                 ): #Aktivierung des Opponent-Buttons
                     if start.selectByCoord(pos):
                         return player_1_color.getValue(), player_2_color.getValue(), opponent_1.getValue(),opponent_2.getValue(), fieldSize.getValue(), int(input_text)
-
 
             if event.type == pygame.KEYDOWN:
                 if active:

@@ -53,7 +53,6 @@ class MCTSNode:
             exploitation = (child.wins / child.visits) if child.visits > 0 else 0  # verhindert das durch 0 geteilt wird
             exploration = exploration_weight * math.sqrt(
                 math.log(self.visits) / (child.visits + 1))  # +1 damit nicht durch 0 geteilt wird
-
             utc_value = exploitation + exploration # zusammensetzen zu utc wert
 
             # Hier dann den maximalen wert und damit das beste Kind aussuchen
@@ -61,18 +60,12 @@ class MCTSNode:
                 best_utc_value = utc_value
                 best_child = child
 
-            # TODO old code noch entfernen
-            """return max(self.children, key=lambda child:
-                        (child.wins / child.visits if child.visits > 0 else 0) +
-                        exploration_weight * math.sqrt(math.log(self.visits) / (child.visits + 1)))"""
-
         return best_child
 
 
     def expand(self, color: str):
         """
         Phase 2 des MCTS: erstellen neuer Knoten des Baumes.
-        liefert zusätzlich den neuen Knoten als return wert (wird jedoch aktuell nicht verwendet)
         """
         available_moves = util.get_possible_moves(self.hex_board)
         move = random.choice(available_moves) # aus allen moves wird ein zufälliger ausgewählt der erweitert werden soll
@@ -80,15 +73,11 @@ class MCTSNode:
         temp_board[move[1]][move[0]] = color    # makes the move (x und y hier wieder vertauscht)
         child_node = MCTSNode(hex_board=temp_board, parent=self, move=move, color=color)
         self.children.append(child_node) # hinzufügen der neuen node zu aktueller node (als children)
-        #return child_node
 
 
     def simulate(self, color: str):
         """
         Phase 3 des MCTS: ausspielen einer Partie mit aktuell zufällig gewählten zügen. Anschließendes auswerten
-
-        Hinweis: anstatt züge zufällig zu wählen, könnte hier dann auch heuristiken angewendet werden, um züge nicht
-        komplett zufällig zu tätigen
         """
         temp_board = deepcopy(self.hex_board) # erstellt 1 zu 1 kopie des aktuellen boards
         moves = util.get_possible_moves(temp_board)
@@ -124,6 +113,9 @@ class MCTSNode:
 
 
     def simulation_move_heuristic(self, board, move, color):
+        """
+        Wert zurückgegeben der angibt wie viele nachbarn ein Feld mit den gleichen Farben hat
+        """
         x, y = move
         score = 0
         neighbors = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]

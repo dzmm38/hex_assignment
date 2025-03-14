@@ -9,8 +9,6 @@ class MCTSAgent(Player):
     Der eigentliche MCTS-KI-Agent der die Klasse MCTSNode für die Baumstruktur und funktionen nutzt
     Ausführung der MCTS Logik
     """
-
-    # iterations = höher gleich besser (d.h. Algorithmus hat mehr informationen für die Auswahl des besten Zuges)
     def __init__(self, iterations=1000, exploration_weight: float = 1):
         super().__init__()
         self.iterations = iterations
@@ -43,8 +41,6 @@ class MCTSAgent(Player):
         root = MCTSNode(hex_board=hex_board, color=self.color) # creates first note in tree (root-node)
 
         # Führt 'x' (iterations) mal nun den MCTS-Zyklus aus (select,expand,simulate,backpropagate)
-
-        #TODO hier noch tqdm einbauen um den Fortschritt zu beachten !
         for _ in tqdm(range(self.iterations)):
             node = self.select_node(root) # Phase 1: select
             if not node.is_fully_expanded():
@@ -54,21 +50,3 @@ class MCTSAgent(Player):
 
         # returns den besten zug (exploration_weight hier 0) da man nur den besten zug auswählen will
         return root.best_children(exploration_weight=0).move
-
-
-### - - - - - - - - - - - - - - - - - - - - - - - - ###
-### --------------- DEBUG & TESTING --------------- ###
-### - - - - - - - - - - - - - - - - - - - - - - - - ###
-"""test_board = [
-    ['RED', '.', '.', 'RED', 'BLUE', '.', '.'],
-    ['RED', '.', 'BLUE', 'RED', 'BLUE', 'RED', '.'],
-    ['RED', '.', '.', 'RED', '.', '.', '.'],
-    ['RED', '.', 'BLUE', 'BLUE', 'RED', 'BLUE', 'BLUE'],
-    ['BLUE', 'RED', 'BLUE', 'BLUE', 'BLUE', 'RED', 'BLUE'],
-    ['BLUE', 'RED', '.', '.', '.', '.', '.'],
-    ['BLUE', 'BLUE', '.', '.', '.', '.', '.']
- ]
-
-agent = MCTSAgent(iterations=10000)
-agent.set_player_color("RED")
-print("Gewählter Move: " + str(agent.get_move(test_board)))"""

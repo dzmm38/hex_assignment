@@ -11,13 +11,12 @@ from env.agents import Player, RandomKI, HumanPlayer, ShortestPathAgent, MCTSAge
 
 class Game:
     EMPTY = '.'
-    #TODO hier habe ich zwei variablen hinzugefügt damit man später zwischen den spieler objekten unterscheiden kann
-    player1: Player
-    player2: Player
+    player1: Player # Spieler Objekt
+    player2: Player # Spieler Objekt
     starting_player: Player
     current_game: int = 1
-    max_game: int
-    pgn_generator: PGNGenerator = None
+    max_game: int   # Wert um max Anzahl der Spiele zu überprüfen
+    pgn_generator: PGNGenerator = None #
 
     def __init__(self, matrix = None):
         self.backgroundColor = consts.BACKGROUND_COLOR
@@ -51,10 +50,6 @@ class Game:
         self.solution = None # ist ungleich None, wenn es einen Gewinner gibt (enthält dann Tiles die zum Gewinnpfad gehören)
         self.quitButton = None
 
-        # TODO delete !!!!
-        #if self.pgn_generator is not None:
-        #    self.star_generator(self.NUM_ROWS)
-
     def updateGameSize(self, gameSize):
         self.NUM_ROWS = gameSize
         self.NUM_COLS = gameSize
@@ -64,7 +59,7 @@ class Game:
         for tile in self.hexTiles():
             tile.colour = self.emptyColour
 
-    # TODO eine methode zum erstellen der spieler objekte hier werden dann die verschiedenen matchups aufgelistet
+   # Hier werden Spieler initialisiert mit den jeweiligen Parametern
     def initialise_players(self,opponent_1, opponent_2, player_1_color, player_2_color):
         if opponent_1 == 'mensch':
             self.player1 = HumanPlayer()
@@ -73,16 +68,16 @@ class Game:
         elif opponent_1 == 'dijkstra-ki':
             self.player1 = ShortestPathAgent(board_size=len(self.matrix), max_depth=3)
         elif opponent_1 == 'mcts-ki':
-            self.player1 = MCTSAgent(iterations=5000, exploration_weight=0.2)
+            self.player1 = MCTSAgent(iterations=10000, exploration_weight=0.5)
 
         if opponent_2 == 'mensch':
             self.player2 = HumanPlayer()
         elif opponent_2 == 'ki':
             self.player2 = RandomKI()
         elif opponent_2 == 'dijkstra-ki':
-            self.player2 = ShortestPathAgent(board_size=len(self.matrix), max_depth=3)
+            self.player2 = ShortestPathAgent(board_size=len(self.matrix), max_depth=5)
         elif opponent_2 == 'mcts-ki':
-            self.player2 = MCTSAgent(iterations=5000, exploration_weight=0.5)
+            self.player2 = MCTSAgent(iterations=10000, exploration_weight=0.5)
 
         self.player1.set_player_color(player_1_color)
         self.player2.set_player_color(player_2_color)
@@ -110,14 +105,11 @@ class Game:
     def get_tile(self,x,y):
         return self.grid.tiles[x,y]
 
-    #TODO muss überarbeitet werden damit hier Klassen verwendet werden können
     def changePlayer(self):
         if self.current_player == self.player1:
             self.current_player = self.player2
         elif self.current_player == self.player2:
             self.current_player = self.player1
-
-        #self.current_player = 'blue' if self.current_player == 'red' else 'red'
 
     def findSolutionPath(self):
         '''
@@ -204,7 +196,7 @@ class Game:
             self.drawTile(tile)
 
         self.showText()
-        self.show_game_number()
+        self.show_game_number() # Shows the Game Number in die Hex Screen
 
         self.drawBorder()
         self.drawQuitButton()
@@ -246,6 +238,9 @@ class Game:
         self.quitButton.draw()
 
     def draw_next_button(self):
+        """
+        Next Button der sofern noch Spiele möglich sind ein neues Spiel startet, nachdem des aktuelle vorbei ist
+        """
         buttonWidth = 150
         buttonHeight = 50
         self.next_button = Button(display=self.display,
@@ -269,9 +264,7 @@ class Game:
     def handle_move(self,x,y,tile):
         # check whether tile is empty and game is not over yet
         if self.matrix[y][x] == self.EMPTY and not self.isGameOver():
-
-            self.pgn_generator.add_move((x,y),self.current_game)
-
+            self.pgn_generator.add_move((x,y),self.current_game) # Zug wird dem PGN Generator zur speicherung gegeben
             tile.colour = self.playerColours[self.current_player.get_player_color()]  # Change
             # update logic in game, that is, matrix, visitedTiles and number of emptyTiles
             self.matrix[y][x] = self.current_player.get_player_color().upper()  # Change
@@ -281,9 +274,8 @@ class Game:
             if self.isGameOver():
                 self.text = 'Game over! {} wins!'.format(self.current_player.get_player_color().capitalize())
                 self.drawSolutionPath()  # Färbt den Gewinnpfad neu ein
-
+                # Setzt das Ergebnis des Spiels in dem PGN Generator
                 self.pgn_generator.set_result(("1-0" if self.current_player == self.player1 else "0-1"),self.current_game)
-
             else:
                 # change the player
                 self.changePlayer()
@@ -299,13 +291,7 @@ class Game:
         self.__init__()
         self.updateGameSize(game_size)
         self.star_generator(game_size)
-        #self.random_starting_player()
         self.change_starting_player()
-
-
-    def random_starting_player(self):
-        self.starting_player = self.player1 if random.randint(0,1) == 0 else self.player2
-        self.current_player = self.starting_player
 
 
     def change_starting_player(self):

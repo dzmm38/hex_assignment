@@ -1,6 +1,5 @@
 import random
 from copy import deepcopy
-from functools import lru_cache
 from env.agents import Player
 from tqdm import tqdm
 import env.agents.utility as util
@@ -18,23 +17,21 @@ class ShortestPathAgent(Player):
         self.max_depth = max_depth
         self.board_size = board_size
         # ----- LOGGING CONFIG ----- #
-        logging.basicConfig(level=logging.DEBUG)
-        #self.counter = 0
+        #logging.basicConfig(level=logging.DEBUG)
 
 
     def board_hash(self,hex_board):
-        return ''.join([''.join(row) for row in hex_board])  # Einfaches Hashing per String
+        """
+        Bildet Board als String ab der in evaluation_cache als key verwendet wird
+        """
+        return ''.join([''.join(row) for row in hex_board])
 
 
     def evaluate_board(self, hex_board: [[]]):
         """
-        TESTED.
         Bewertet den aktuellen Spielzustand. Dabei wird als bewertung ein dijkstra verwendet, um anhand des kürzesten
         weges eine bewertung vorzunehmen (genaueres im dijkstra).
         Für beide Spieler wird eine bewertung vorgenommen, um nicht nur den eigenen Teil des feldes zu berücksichtigen
-
-        Vorschlag: hier können zusätzlich weitere bewertungskriterien eingebracht werden die dann zusammen den value
-        des boards bestimmen
         """
         board_key = self.board_hash(hex_board)  # Board-Hash als Key für Cache
         if board_key in self.evaluation_cache:
@@ -42,22 +39,15 @@ class ShortestPathAgent(Player):
 
         own_value = 100
         opp_value = -100
-
         own_paths = self.dijkstra(hex_board, self.color.upper())
-        if not own_paths:
-            print(own_paths)
-            print(hex_board)
         opp_paths = self.dijkstra(hex_board, 'BLUE' if self.color == 'RED' else 'RED')
-
         if len(own_paths) != 0:
-            # mit heappop wird der Pfad mit den geringsten Kosten ausgewählt → kürzester Pfad
-            own_value, _ = own_paths[0]
+            own_value, _ = own_paths[0] # kürzester Pfad
         if len(opp_paths) != 0:
             opp_value, _ = opp_paths[0]
 
         result = opp_value - own_value
         self.evaluation_cache[board_key] = result
-
         #logging.debug("Value of board state: "+str(own_value-opp_value)+" / "+"own: "+ str(own_value)+ " -- opp: "+str(opp_value))
         return result  # kleiner gleich besserer
 
@@ -68,10 +58,8 @@ class ShortestPathAgent(Player):
         und returned diesen dann in einem Heap mit den jeweiligen Kosten
         """
         start_nodes, end_nodes = util.get_starting_positions(hex_board=hex_board, color=color)
-
         priority_queue: heapq = []
         paths = []
-
         distances = {} # started mit kosten unendlich für alle felder
         from_node: dict = {} # dictionary in dem die ausgehenden nodes gespeichert werden
 
@@ -84,7 +72,6 @@ class ShortestPathAgent(Player):
                 heapq.heappush(priority_queue, (1, start))
 
         #logging.debug("Dijkstra Startknoten kosten: " + str(priority_queue))
-
         visited_nodes = set()  # sodass es keine duplicate geben kann
 
         while priority_queue:
@@ -106,43 +93,46 @@ class ShortestPathAgent(Player):
 
             for neighbor in neighbors:
                 if hex_board[neighbor[1]][neighbor[0]] == color:
-                    cost = 0
+                    cost = 0 # Wenn schon eigene Farbe
                 elif hex_board[neighbor[1]][neighbor[0]] == '.':
-                    cost = 1
+                    cost = 1 # Wenn Feld leer ist
                 else:
                     continue # ignoriert dann einfach diesen durchgang da nicht möglich
 
                 new_distance = current_distance + cost
-
                 if new_distance < distances.get(neighbor, float('inf')):
                     from_node[neighbor] = current_node
                     distances[neighbor] = new_distance
                     heapq.heappush(priority_queue, (new_distance, neighbor))
-
         return paths
 
+
     def minmax(self, hex_board: [[]], depth: int, alpha: float, beta: float, maximizing: bool, progress_bar=None):
+        """
+        MiniMax Algorithmus zur bestimmung des besten Zuges mit alpha-beta prunning
+        """
+        # Abbruchkriterium für die Rekursion
         if depth == 0 or util.is_game_over(hex_board=hex_board, color=self.color.upper()):
             return self.evaluate_board(hex_board=hex_board)
 
         possible_moves = util.get_possible_moves(hex_board=hex_board)
 
+        # Progressbar initialisierung
         if progress_bar is None and depth == self.max_depth:
             progress_bar = tqdm(total=len(possible_moves), desc=f"MinMax Suche für Tiefe: {self.max_depth}", leave=True)
 
+        # Maximierung des eigenen Zuges wählt die möglichkeit mit höchsten wert (da eigener Zug)
         if maximizing:
             max_evaluation = float('-inf')
             best_move = None
-            # Priorisierung der Züge
-            #possible_moves.sort(key=lambda move: self.simulation_move_heuristic(hex_board, move, self.color), reverse=True)
             random.shuffle(possible_moves)
 
             for move in possible_moves:
-                temp_board = deepcopy(hex_board)  # kopieren des aktuellen boards zum Berechnen ## TODO durch deepcopy erstzen
+                temp_board = deepcopy(hex_board)  # kopieren des aktuellen boards zum Berechnen
                 temp_board[move[1]][move[0]] = self.color.upper()
-                evaluation = self.minmax(temp_board, depth - 1, alpha, beta, False)
+                evaluation = self.minmax(temp_board, depth - 1, alpha, beta, False) # Rekursion aufruf
 
-                if evaluation > max_evaluation:
+                if evaluation > max_evaluation: # aktualisiert besten move wenn neuer wert höher ist als bisheriger
                     max_evaluation = evaluation
                     best_move = move
 
@@ -155,29 +145,22 @@ class ShortestPathAgent(Player):
 
             if depth == self.max_depth:
                 progress_bar.close()  # Schließe die Progress Bar nach der ersten Ebene
-            # return max_evaluation if depth > 1 else best_move
-
-            if best_move is None and depth == self.max_depth:
-                print("Hier ist ein Fehler")
 
             if depth == self.max_depth:
-                return best_move
+                return best_move # wenn wieder bei oberste Rekursionsebene angekommen
             else:
-                return max_evaluation
-
-            #return best_move if depth == self.max_depth else max_evaluation
-
+                return max_evaluation # wenn noch in einer niedrigen Rekursion
 
         else:
+            # Minimierung dieses Zuges (niedrigster wert)
+            # da der gegner potenziell immer den schlechtesten Zug für einen selbst wählt
             min_evaluation = float('inf')
-            # Priorisierung der Züge
-            #possible_moves.sort(key=lambda move: self.simulation_move_heuristic(hex_board, move, 'BLUE' if self.color.upper() == 'RED' else 'RED'),reverse=True)
             random.shuffle(possible_moves)
 
             for move in possible_moves:
                 temp_board = deepcopy(hex_board)  # kopieren des aktuellen boards zum Berechnen
                 temp_board[move[1]][move[0]] = 'BLUE' if self.color.upper() == 'RED' else 'RED'
-                evaluation = self.minmax(temp_board, depth - 1, alpha, beta, True)
+                evaluation = self.minmax(temp_board, depth - 1, alpha, beta, True) # Rekursion aufruf
 
                 min_evaluation = min(min_evaluation, evaluation)
                 beta = min(beta, evaluation)
@@ -202,18 +185,9 @@ class ShortestPathAgent(Player):
                 logging.debug("Gewinnzug gefunden: " + str(move))
                 return move
 
+        # initialisieren der alpha und beta werte
         alpha = float('-inf')
         beta = float('inf')
+        #Aufruf des MiniMax Algorithmus
         best_move = self.minmax(hex_board=hex_board,depth=self.max_depth,alpha=alpha, beta=beta,maximizing=True)
         return best_move
-
-
-    def simulation_move_heuristic(self, board, move, color):
-        x, y = move
-        score = 0
-        neighbors = [(x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)]
-
-        for nx, ny in neighbors:
-            if 0 <= nx < len(board) and 0 <= ny < len(board) and board[ny][nx] == color:
-                score += 1
-        return score
